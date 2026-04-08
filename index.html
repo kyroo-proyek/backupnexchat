@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexWA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111b21;--surface2:#1f2c34;--surface3:#2a3942;
+  --border:#2a3942;--accent:#00a884;--accent2:#25d366;
+  --text:#e9edef;--text-muted:#8696a0;--text-sec:#aebac1;
+  --danger:#f15c6d;--warning:#ffb547;--info:#539cdd;
+  --msg-out:#005c4b;--msg-in:#1f2c34;--overlay:rgba(0,0,0,.6);
+  --verify-green:#25d366;--verify-blue:#539cdd;--verify-gold:#f5c518;
+  --banner-blue:linear-gradient(135deg,#1a3a5c,#2563a8,#1a3a5c);
+  --banner-gold:linear-gradient(135deg,#5c3a00,#c8960c,#f5c518,#c8960c,#5c3a00);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;display:flex;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px;}
+
+/* ══ LOGO SVG ══ */
+.nexwa-logo{display:flex;align-items:center;gap:8px;}
+.nexwa-logo-svg{width:32px;height:32px;flex-shrink:0;}
+.nexwa-logo-text{font-size:18px;font-weight:700;color:var(--accent2);letter-spacing:-.3px;}
+
+/* ══ VERIFICATION BADGES ══ */
+.badge-verify{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;flex-shrink:0;margin-left:3px;}
+.badge-green{background:var(--verify-green);}
+.badge-blue{background:var(--verify-blue);}
+.badge-gold{background:var(--verify-gold);}
+.badge-verify svg{width:10px;height:10px;}
+
+/* ══ VERIFICATION BANNER ══ */
+.verify-banner{
+  width:100%;padding:6px 14px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:12px;font-weight:700;letter-spacing:.5px;
+  border-radius:0 0 8px 8px;
+  margin-bottom:2px;
+}
+.verify-banner.blue{
+  background:var(--banner-blue);
+  color:#7eb8f7;border:1px solid rgba(83,156,221,.4);
+  text-shadow:0 0 10px rgba(83,156,221,.6);
+}
+.verify-banner.gold{
+  background:var(--banner-gold);
+  color:#fff3a0;border:1px solid rgba(245,197,24,.4);
+  text-shadow:0 0 10px rgba(245,197,24,.6);
+}
+.banner-icon{font-size:14px;}
+
+/* ══ AUTH ══ */
+.auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;}
+.auth-wrap{width:100%;max-width:400px;padding:20px;}
+.auth-logo-wrap{text-align:center;margin-bottom:28px;}
+.auth-logo-svg-big{width:64px;height:64px;margin:0 auto 10px;}
+.auth-logo-name{font-size:26px;font-weight:700;color:var(--accent2);}
+.auth-logo-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+.auth-card{background:var(--surface);border-radius:16px;padding:24px;border:1px solid var(--border);}
+.auth-tabs{display:flex;gap:0;margin-bottom:20px;background:var(--surface2);border-radius:10px;padding:3px;}
+.auth-tab{flex:1;padding:9px;text-align:center;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);transition:.2s;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.input-group{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.input-lbl{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+.phone-row{display:flex;gap:8px;}
+.cc-input{width:72px;padding:11px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;text-align:center;}
+.a-input{width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:.2s;font-family:'Inter',sans-serif;}
+.a-input:focus{border-color:var(--accent);}
+.a-input::placeholder{color:var(--text-muted);}
+.auth-btn{width:100%;padding:13px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;}
+.auth-btn:hover:not(:disabled){background:var(--accent2);}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed;}
+.auth-err{color:var(--danger);font-size:12px;text-align:center;min-height:16px;margin-bottom:6px;}
+.auth-terms{font-size:11px;color:var(--text-muted);text-align:center;line-height:1.5;margin-top:10px;}
+.auth-terms span{color:var(--accent);}
+#regFields{display:none;flex-direction:column;gap:10px;}
+
+/* ══ BANNED ══ */
+.banned-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:998;padding:24px;text-align:center;}
+.banned-screen.show{display:flex;}
+.banned-icon{font-size:72px;}
+.banned-title{font-size:24px;font-weight:700;color:var(--danger);}
+.banned-desc{color:var(--text-muted);font-size:14px;max-width:300px;line-height:1.6;}
+.banned-reason-box{background:rgba(241,92,109,.1);border:1px solid rgba(241,92,109,.3);border-radius:10px;padding:12px 20px;font-size:13px;color:var(--danger);max-width:320px;}
+.appeal-btn{padding:13px 28px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;}
+
+/* ══ APP LAYOUT ══ */
+.app{display:flex;width:100%;height:100%;}
+
+/* ══ LEFT PANEL ══ */
+.left-panel{width:360px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%;}
+.lp-header{padding:12px 16px;background:var(--surface2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.lp-actions{display:flex;gap:2px;}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:transparent;border:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:.15s;}
+.icon-btn:hover{background:var(--surface3);color:var(--text);}
+.mailbox-pill{margin:8px 12px 0;background:var(--surface2);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s;border:1px solid var(--border);}
+.mailbox-pill:hover{background:var(--surface3);}
+.mp-icon{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.mp-text{flex:1;}
+.mp-title{font-size:14px;font-weight:500;}
+.mp-sub{font-size:11px;color:var(--text-muted);}
+.mp-badge{background:var(--accent);color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;display:none;}
+.mp-badge.show{display:inline-block;}
+.search-wrap{padding:8px 12px;flex-shrink:0;}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:10px;padding:8px 12px;}
+.search-box svg{flex-shrink:0;opacity:.5;}
+.search-box input{flex:1;background:transparent;border:none;color:var(--text);font-size:14px;outline:none;font-family:'Inter',sans-serif;}
+.search-box input::placeholder{color:var(--text-muted);}
+.nav-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.nav-tab{flex:1;padding:11px 4px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent;transition:.2s;}
+.nav-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
+.chat-list{flex:1;overflow-y:auto;}
+
+/* ══ CHAT ITEM ══ */
+.chat-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;transition:.15s;border-bottom:1px solid rgba(42,57,66,.4);}
+.chat-item:hover{background:var(--surface2);}
+.chat-item.active{background:var(--surface3);}
+.ci-avatar{width:46px;height:46px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--accent2);flex-shrink:0;overflow:hidden;}
+.ci-avatar img{width:100%;height:100%;object-fit:cover;}
+.ci-info{flex:1;min-width:0;}
+.ci-name{font-size:15px;font-weight:500;display:flex;align-items:center;gap:4px;white-space:nowrap;overflow:hidden;}
+.ci-name-text{overflow:hidden;text-overflow:ellipsis;}
+.ci-preview{font-size:13px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.ci-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.ci-time{font-size:11px;color:var(--text-muted);}
+.unread-pill{background:var(--accent2);color:#000;border-radius:20px;padding:2px 7px;font-size:11px;font-weight:700;}
+
+/* ══ CHAT AREA ══ */
+.chat-area{flex:1;display:flex;flex-direction:column;height:100%;background:var(--bg);position:relative;}
+.chat-bg{position:absolute;inset:0;opacity:.03;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2300a884'%3E%3Ccircle cx='10' cy='10' r='2'/%3E%3Ccircle cx='30' cy='10' r='2'/%3E%3Ccircle cx='50' cy='10' r='2'/%3E%3Ccircle cx='20' cy='30' r='2'/%3E%3Ccircle cx='40' cy='30' r='2'/%3E%3Ccircle cx='10' cy='50' r='2'/%3E%3Ccircle cx='30' cy='50' r='2'/%3E%3Ccircle cx='50' cy='50' r='2'/%3E%3C/g%3E%3C/svg%3E");}
+.chat-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:var(--text-muted);position:relative;z-index:1;}
+.ce-logo{width:80px;height:80px;}
+.ce-title{font-size:17px;font-weight:600;}
+.ce-sub{font-size:13px;}
+
+/* CHAT HEADER */
+.chat-header{padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;position:relative;z-index:2;}
+.ch-avatar{width:40px;height:40px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--accent2);cursor:pointer;overflow:hidden;flex-shrink:0;}
+.ch-avatar img{width:100%;height:100%;object-fit:cover;}
+.ch-info{flex:1;cursor:pointer;min-width:0;}
+.ch-name{font-size:15px;font-weight:600;display:flex;align-items:center;gap:4px;}
+.ch-status{font-size:12px;color:var(--text-muted);}
+.ch-actions{display:flex;gap:2px;}
+
+/* MESSAGES */
+.messages-wrap{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1;}
+.msg-date-sep{text-align:center;margin:8px 0;}
+.msg-date-sep span{background:var(--surface2);padding:5px 12px;border-radius:20px;font-size:11px;color:var(--text-muted);}
+.msg-row{display:flex;flex-direction:column;max-width:65%;}
+.msg-row.out{align-self:flex-end;align-items:flex-end;}
+.msg-row.in{align-self:flex-start;align-items:flex-start;}
+.msg-bubble{padding:8px 12px;border-radius:10px;font-size:14px;line-height:1.5;word-break:break-word;}
+.msg-row.out .msg-bubble{background:var(--msg-out);border-bottom-right-radius:3px;}
+.msg-row.in .msg-bubble{background:var(--msg-in);border-bottom-left-radius:3px;}
+.msg-bubble.deleted{color:var(--text-muted);font-style:italic;font-size:13px;}
+.msg-media{max-width:260px;margin-bottom:4px;}
+.msg-media img{width:100%;border-radius:8px;cursor:pointer;display:block;}
+.msg-media video,.msg-media audio{width:100%;border-radius:8px;display:block;}
+.msg-file{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border-radius:8px;padding:10px;min-width:180px;cursor:pointer;margin-bottom:4px;}
+.msg-file-icon{font-size:26px;flex-shrink:0;}
+.msg-file-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.msg-file-size{font-size:11px;color:var(--text-muted);}
+.msg-footer{display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:2px;}
+.msg-time{font-size:10px;color:var(--text-muted);}
+.msg-status{font-size:11px;color:var(--text-muted);}
+.msg-status.read{color:var(--info);}
+.msg-edited{font-size:10px;color:var(--text-muted);font-style:italic;}
+.msg-actions{display:none;gap:4px;margin-top:3px;}
+.msg-row:hover .msg-actions{display:flex;}
+.msg-act{padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;background:var(--surface2);border:1px solid var(--border);transition:.15s;white-space:nowrap;}
+.msg-act:hover{background:var(--surface3);}
+.msg-act.danger{color:var(--danger);}
+.msg-act.danger:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
+
+/* TYPING */
+.typing-bar{padding:4px 16px;font-size:12px;color:var(--accent2);display:none;flex-shrink:0;align-items:center;gap:6px;z-index:2;}
+.typing-bar.show{display:flex;}
+.typing-dots span{display:inline-block;width:4px;height:4px;background:var(--accent2);border-radius:50%;animation:td 1.2s infinite;}
+.typing-dots span:nth-child(2){animation-delay:.2s;} .typing-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* INPUT */
+.input-area{padding:8px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;position:relative;z-index:2;}
+.reply-bar{display:none;background:var(--surface2);border-radius:8px;padding:7px 12px;margin-bottom:7px;border-left:3px solid var(--accent);align-items:center;gap:8px;}
+.reply-bar.show{display:flex;}
+.rb-content{flex:1;min-width:0;}
+.rb-author{font-size:11px;color:var(--accent);font-weight:600;}
+.rb-text{font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rb-close{cursor:pointer;color:var(--text-muted);font-size:18px;}
+.rb-close:hover{color:var(--danger);}
+.attach-menu{position:absolute;bottom:68px;left:12px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);padding:6px;display:none;flex-direction:column;gap:2px;z-index:10;min-width:150px;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+.attach-menu.open{display:flex;}
+.attach-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;transition:.15s;}
+.attach-item:hover{background:var(--surface3);}
+.input-row{display:flex;align-items:flex-end;gap:8px;}
+.attach-btn{width:38px;height:38px;border-radius:50%;background:transparent;border:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;}
+.attach-btn:hover{color:var(--accent2);}
+.input-box{flex:1;background:var(--surface2);border-radius:22px;padding:9px 16px;display:flex;align-items:flex-end;gap:8px;}
+.msg-input{flex:1;background:transparent;border:none;color:var(--text);font-size:14px;outline:none;resize:none;max-height:120px;min-height:20px;line-height:1.5;font-family:'Inter',sans-serif;}
+.msg-input::placeholder{color:var(--text-muted);}
+.send-btn{width:38px;height:38px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;}
+.send-btn:hover{background:var(--accent2);transform:scale(1.05);}
+#fileImage,#fileVideo,#fileAudio,#fileDoc{display:none;}
+
+/* ══ INFO PANEL ══ */
+.info-panel{width:310px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;height:100%;overflow-y:auto;}
+.info-panel.open{display:flex;}
+.ip-header{padding:13px 16px;background:var(--surface2);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.ip-title{font-size:15px;font-weight:600;flex:1;}
+.ip-avatar-wrap{padding:20px 0 8px;display:flex;flex-direction:column;align-items:center;}
+.ip-avatar{width:80px;height:80px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:var(--accent2);overflow:hidden;}
+.ip-avatar img{width:100%;height:100%;object-fit:cover;}
+.ip-name{font-size:19px;font-weight:700;text-align:center;display:flex;align-items:center;gap:5px;justify-content:center;margin-top:8px;}
+.ip-phone{font-size:13px;color:var(--text-muted);text-align:center;margin-top:3px;}
+.ip-bio{font-size:13px;color:var(--text-sec);text-align:center;margin:8px 16px;line-height:1.5;}
+.ip-section{border-top:1px solid var(--border);padding:14px 16px;}
+.ip-section-title{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+.ip-input{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:.2s;}
+.ip-input:focus{border-color:var(--accent);}
+.ip-save{width:100%;padding:10px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;transition:.2s;}
+.ip-save:hover{background:var(--accent2);}
+.ip-actions{padding:14px 16px;display:flex;flex-direction:column;gap:8px;}
+.ip-btn{padding:11px;border-radius:8px;border:1px solid;font-size:14px;cursor:pointer;transition:.2s;width:100%;text-align:left;display:flex;align-items:center;gap:8px;background:transparent;}
+.ip-btn.block{border-color:rgba(241,92,109,.3);color:var(--danger);}
+.ip-btn.block:hover{background:var(--danger);color:#fff;}
+.ip-btn.report{border-color:rgba(255,181,71,.3);color:var(--warning);}
+.ip-btn.report:hover{background:var(--warning);color:#000;}
+.ip-btn.del{border-color:rgba(241,92,109,.2);color:var(--danger);}
+.ip-btn.del:hover{background:var(--danger);color:#fff;}
+
+/* ══ SIDEBAR ══ */
+.sidebar-overlay{position:fixed;inset:0;background:var(--overlay);z-index:100;display:none;}
+.sidebar-overlay.open{display:block;}
+.sidebar{position:fixed;right:0;top:0;bottom:0;width:290px;background:var(--surface);border-left:1px solid var(--border);z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:.3s ease;}
+.sidebar.open{transform:translateX(0);}
+.sb-header{padding:18px 16px 14px;background:var(--surface2);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.sb-title{font-size:17px;font-weight:700;flex:1;}
+.sb-avatar-wrap{position:relative;width:76px;height:76px;margin:18px auto 10px;cursor:pointer;}
+.sb-avatar{width:76px;height:76px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:var(--accent2);overflow:hidden;}
+.sb-avatar img{width:100%;height:100%;object-fit:cover;}
+.sb-edit-badge{position:absolute;bottom:2px;right:2px;width:22px;height:22px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--surface);}
+.sb-phone{font-size:12px;color:var(--text-muted);text-align:center;margin-bottom:14px;}
+.sb-verify-badges{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+.sb-verify-item{display:flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:20px;}
+.sb-verify-item.green{background:rgba(37,211,102,.15);color:var(--verify-green);}
+.sb-verify-item.blue{background:rgba(83,156,221,.15);color:var(--verify-blue);}
+.sb-verify-item.gold{background:rgba(245,197,24,.15);color:var(--verify-gold);}
+.sb-section{padding:10px 16px;border-top:1px solid var(--border);}
+.sb-section-title{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.sb-input{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:.2s;margin-bottom:7px;}
+.sb-input:focus{border-color:var(--accent);}
+.sb-save{width:100%;padding:10px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;}
+.sb-save:hover{background:var(--accent2);}
+.sb-saved{color:var(--accent2);font-size:12px;text-align:center;display:none;margin-top:5px;}
+.sb-saved.show{display:block;}
+.sb-logout{margin:14px 16px;padding:11px;border-radius:8px;background:rgba(241,92,109,.1);border:1px solid rgba(241,92,109,.3);color:var(--danger);font-size:14px;font-weight:600;cursor:pointer;transition:.2s;width:calc(100% - 32px);}
+.sb-logout:hover{background:var(--danger);color:#fff;}
+#avatarInput{display:none;}
+
+/* ══ MAILBOX POPUP ══ */
+.mailbox-popup{position:fixed;bottom:90px;left:380px;width:330px;background:var(--surface);border-radius:14px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:50;display:none;flex-direction:column;max-height:460px;}
+.mailbox-popup.open{display:flex;}
+.mbox-header{padding:12px 14px;background:var(--surface2);border-radius:14px 14px 0 0;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.mbox-title{flex:1;font-size:14px;font-weight:600;}
+.mbox-body{flex:1;overflow-y:auto;padding:8px;}
+.mail-item{padding:11px 12px;border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent;margin-bottom:5px;}
+.mail-item:hover{background:var(--surface2);}
+.mail-item.unread{border-color:rgba(0,168,132,.3);background:rgba(0,168,132,.05);}
+.mail-item-title{font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px;}
+.mail-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;flex-shrink:0;}
+.mail-item.read .mail-dot{display:none;}
+.mail-preview{font-size:12px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mail-time{font-size:10px;color:var(--text-muted);margin-top:3px;}
+.mail-detail{display:none;padding:12px;border-top:1px solid var(--border);}
+.mail-detail.show{display:block;}
+.mail-detail-title{font-size:14px;font-weight:600;margin-bottom:7px;}
+.mail-detail-content{font-size:13px;color:var(--text-sec);line-height:1.6;white-space:pre-wrap;}
+.mail-detail-link{display:inline-flex;align-items:center;gap:5px;margin-top:9px;padding:7px 14px;border-radius:8px;background:rgba(0,168,132,.15);border:1px solid rgba(0,168,132,.3);color:var(--accent);text-decoration:none;font-size:13px;}
+.mail-empty{padding:28px;text-align:center;color:var(--text-muted);font-size:13px;}
+
+/* ══ FIND MODAL ══ */
+.find-modal{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.find-modal.open{display:flex;}
+.find-box{background:var(--surface);border-radius:14px;width:100%;max-width:360px;border:1px solid var(--border);}
+.find-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.find-title{font-size:15px;font-weight:600;flex:1;}
+.find-input{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;margin:12px 14px;width:calc(100% - 28px);display:block;}
+.find-input:focus{border-color:var(--accent);}
+.find-results{max-height:280px;overflow-y:auto;}
+.find-user-item{display:flex;align-items:center;gap:11px;padding:11px 16px;cursor:pointer;transition:.15s;}
+.find-user-item:hover{background:var(--surface2);}
+.find-avatar{width:42px;height:42px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--accent2);overflow:hidden;flex-shrink:0;}
+.find-avatar img{width:100%;height:100%;object-fit:cover;}
+.find-empty{padding:20px;text-align:center;color:var(--text-muted);font-size:13px;}
+
+/* ══ CHANNEL ══ */
+.channel-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;transition:.15s;border-bottom:1px solid rgba(42,57,66,.4);}
+.channel-item:hover{background:var(--surface2);}
+.ch-item-avatar{width:46px;height:46px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;flex-shrink:0;}
+.ch-item-avatar img{width:100%;height:100%;object-fit:cover;}
+.ch-follow-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;flex-shrink:0;}
+.ch-follow-btn.following{background:var(--accent);color:#fff;}
+.ch-follow-btn:hover{background:var(--accent);color:#fff;}
+.create-ch-btn{padding:8px 16px;border-radius:20px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;}
+.create-ch-btn:hover{background:var(--accent2);}
+
+/* ══ MODAL GENERIC ══ */
+.modal{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;z-index:300;padding:20px;}
+.modal.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:14px;width:100%;max-width:370px;border:1px solid var(--border);padding:22px;display:flex;flex-direction:column;gap:12px;}
+.modal-title{font-size:16px;font-weight:700;}
+.modal-input{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;}
+.modal-input:focus{border-color:var(--accent);}
+.modal-textarea{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;resize:none;min-height:72px;}
+.modal-btns{display:flex;gap:10px;}
+.modal-cancel{flex:1;padding:10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-size:14px;cursor:pointer;}
+.modal-submit{flex:1;padding:10px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
+.modal-submit:hover{background:var(--accent2);}
+.report-opts{display:flex;flex-direction:column;gap:6px;}
+.report-opt{padding:10px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;font-size:14px;transition:.15s;}
+.report-opt:hover,.report-opt.sel{border-color:var(--accent);color:var(--accent);}
+
+/* ══ CS WIDGET ══ */
+.cs-fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:400;box-shadow:0 4px 20px rgba(0,168,132,.4);transition:.2s;}
+.cs-fab:hover{background:var(--accent2);transform:scale(1.07);}
+.cs-fab svg{width:26px;height:26px;}
+.cs-notif-dot{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:var(--danger);border-radius:50%;border:2px solid var(--bg);display:none;}
+.cs-notif-dot.show{display:block;}
+.cs-panel{position:fixed;bottom:86px;right:24px;width:340px;background:var(--surface);border-radius:16px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:399;display:none;flex-direction:column;max-height:520px;overflow:hidden;}
+.cs-panel.open{display:flex;}
+.cs-panel-header{padding:14px 16px;background:var(--surface2);border-radius:16px 16px 0 0;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid var(--border);}
+.cs-panel-avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cs-panel-info{flex:1;}
+.cs-panel-name{font-size:14px;font-weight:600;}
+.cs-panel-status{font-size:11px;color:var(--accent2);}
+.cs-body{flex:1;overflow-y:auto;padding:14px;}
+
+/* CS — CATEGORY SCREEN */
+.cs-category-title{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text-sec);}
+.cs-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.cs-cat-btn{padding:12px 10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;text-align:center;font-size:12px;font-weight:500;transition:.2s;color:var(--text);}
+.cs-cat-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cs-cat-btn.sel{border-color:var(--accent);background:rgba(0,168,132,.1);color:var(--accent);}
+.cs-cat-icon{font-size:22px;margin-bottom:5px;}
+.cs-start-btn{width:100%;padding:11px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;display:none;}
+.cs-start-btn.show{display:block;}
+.cs-start-btn:hover{background:var(--accent2);}
+
+/* CS — CHAT SCREEN */
+.cs-chat-screen{display:none;flex-direction:column;height:100%;}
+.cs-chat-screen.show{display:flex;}
+.cs-messages{flex:1;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:280px;overflow-y:auto;padding-bottom:4px;}
+.cs-msg{padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;max-width:80%;word-break:break-word;}
+.cs-msg.user{background:var(--msg-out);align-self:flex-end;border-bottom-right-radius:3px;}
+.cs-msg.dev{background:var(--msg-in);align-self:flex-start;border-bottom-left-radius:3px;}
+.cs-msg-time{font-size:10px;color:var(--text-muted);margin-top:2px;text-align:right;}
+.cs-input-wrap{border-top:1px solid var(--border);padding:10px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;}
+.cs-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;resize:none;max-height:80px;min-height:36px;transition:.2s;}
+.cs-input:focus{border-color:var(--accent);}
+.cs-input::placeholder{color:var(--text-muted);}
+.cs-send-btn{width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;}
+.cs-send-btn:hover{background:var(--accent2);}
+
+/* ══ APPEAL ══ */
+.appeal-modal{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+.appeal-modal.open{display:flex;}
+.appeal-box{background:var(--surface);border-radius:16px;padding:24px;width:100%;max-width:380px;border:1px solid var(--border);display:flex;flex-direction:column;gap:12px;}
+.appeal-textarea{width:100%;padding:11px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;resize:none;min-height:110px;}
+.appeal-btns{display:flex;gap:10px;}
+.ap-cancel{flex:1;padding:10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-size:14px;cursor:pointer;}
+.ap-submit{flex:1;padding:10px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
+.ap-success{color:var(--accent2);font-size:12px;text-align:center;display:none;}
+.ap-success.show{display:block;}
+
+/* ══ NOTIF ══ */
+.notif-container{position:fixed;top:16px;right:16px;display:flex;flex-direction:column;gap:9px;z-index:9999;pointer-events:none;}
+.notif-card{display:flex;align-items:center;gap:11px;background:var(--surface2);border:1px solid var(--border);border-radius:13px;padding:11px 14px;min-width:270px;max-width:320px;box-shadow:0 6px 20px rgba(0,0,0,.5);pointer-events:all;cursor:pointer;animation:nIn .25s ease;}
+@keyframes nIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.notif-card.hide{opacity:0;transform:translateX(16px);transition:.25s;}
+.notif-avatar{width:40px;height:40px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--accent2);flex-shrink:0;overflow:hidden;position:relative;}
+.notif-avatar img{width:100%;height:100%;object-fit:cover;}
+.notif-body{flex:1;min-width:0;}
+.notif-app{font-size:10px;color:var(--accent2);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.notif-name{font-size:13px;font-weight:600;}
+.notif-msg{font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notif-close-btn{background:var(--surface3);border:none;color:var(--text-muted);cursor:pointer;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.notif-close-btn:hover{background:var(--danger);color:#fff;}
+.notif-banner-bar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--accent);border-radius:14px;padding:13px 18px;display:flex;align-items:center;gap:12px;z-index:500;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:340px;}
+.notif-allow-btn{padding:8px 14px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.notif-dismiss-btn{padding:8px;background:transparent;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;flex-shrink:0;}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:999;cursor:zoom-out;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:92vw;max-height:92vh;border-radius:8px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);padding:9px 18px;border-radius:20px;font-size:13px;z-index:1000;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap;}
+.toast.show{opacity:1;}
+
+@media(max-width:768px){
+  .left-panel{width:100%;}
+  .chat-area{display:none;}
+  .chat-area.mob{display:flex;position:fixed;inset:0;z-index:50;}
+  .info-panel{width:100%;position:fixed;inset:0;z-index:60;}
+  .mailbox-popup{left:10px;right:10px;width:auto;}
+  .cs-panel{right:10px;left:10px;width:auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH ══ -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-wrap">
+    <div class="auth-logo-wrap">
+      <svg class="auth-logo-svg-big" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="64" height="64" rx="16" fill="#111b21"/>
+        <path d="M12 48V16l14 20 14-20v32" stroke="#25d366" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 32h12a4 4 0 0 1 0 8H40v-8z" fill="#00a884" opacity=".9"/>
+        <circle cx="46" cy="36" r="2" fill="#111b21"/>
+        <path d="M40 32v-6a3 3 0 0 1 6 0v2" stroke="#25d366" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div class="auth-logo-name">NexWA</div>
+      <div class="auth-logo-sub">Kirim pesan, tetap terhubung</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Masuk</div>
+        <div class="auth-tab" id="tabRegister" onclick="switchTab('register')">Daftar</div>
+      </div>
+      <div class="input-group">
+        <div id="regFields">
+          <div><div class="input-lbl">Nama Lengkap</div><input class="a-input" id="regName" placeholder="Nama kamu"></div>
+          <div style="margin-top:10px"><div class="input-lbl">Username</div><input class="a-input" id="regUsername" placeholder="username (tanpa spasi)"></div>
+        </div>
+        <div>
+          <div class="input-lbl">Nomor Telepon</div>
+          <div class="phone-row">
+            <input class="a-input cc-input" id="countryCode" value="+62">
+            <input class="a-input" id="authPhone" type="tel" placeholder="81234567890" style="flex:1">
+          </div>
+        </div>
+        <div><div class="input-lbl">Password</div><input class="a-input" id="authPass" type="password" placeholder="Password (min 6 karakter)"></div>
+      </div>
+      <div class="auth-err" id="authErr"></div>
+      <button class="auth-btn" id="authBtn" onclick="handleAuth()">Masuk</button>
+      <div class="auth-terms">Dengan melanjutkan kamu menyetujui <span>S&K</span> dan <span>Kebijakan Privasi</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BANNED ══ -->
+<div class="banned-screen" id="bannedScreen">
+  <div class="banned-icon">🚫</div>
+  <div class="banned-title">Akun Diblokir</div>
+  <div class="banned-desc">Akunmu telah diblokir oleh tim NexWA berdasarkan laporan pelanggaran.</div>
+  <div class="banned-reason-box" id="bannedReason">Alasan: Pelanggaran S&K</div>
+  <button class="appeal-btn" onclick="openAppeal()">📝 Ajukan Banding</button>
+</div>
+
+<!-- ══ APP ══ -->
+<div class="app" id="app" style="display:none">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="lp-header">
+      <div class="nexwa-logo">
+        <svg class="nexwa-logo-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="#111b21"/>
+          <path d="M7 30V10l9 13 9-13v20" stroke="#25d366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M25 20h8a3 3 0 0 1 0 6h-8v-6z" fill="#00a884"/>
+          <circle cx="29" cy="23" r="1.5" fill="#111b21"/>
+          <path d="M25 20v-4a2 2 0 0 1 4 0v1.5" stroke="#25d366" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="nexwa-logo-text">NexWA</span>
+      </div>
+      <div class="lp-actions">
+        <button class="icon-btn" onclick="openFind()" title="Cari Pengguna">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+        <button class="icon-btn" onclick="toggleMailbox()" title="Mailbox">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </button>
+        <button class="icon-btn" onclick="openSidebar()" title="Menu">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="mailbox-pill" onclick="toggleMailbox()">
+      <div class="mp-icon">📬</div>
+      <div class="mp-text"><div class="mp-title">Kotak Masuk</div><div class="mp-sub">Pesan dari NexWA</div></div>
+      <div class="mp-badge" id="mailboxBadge">0</div>
+    </div>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input placeholder="Cari atau mulai chat baru" id="searchChats" oninput="filterChats()">
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <div class="nav-tab active" onclick="switchNavTab('chats',this)">💬 Chat</div>
+      <div class="nav-tab" onclick="switchNavTab('channels',this)">📢 Channel</div>
+    </div>
+    <div class="chat-list" id="chatList"></div>
+    <div class="chat-list" id="channelList" style="display:none"></div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area" id="chatArea">
+    <div class="chat-bg"></div>
+    <div class="chat-empty" id="chatEmpty">
+      <svg class="ce-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="80" height="80" rx="20" fill="#111b21"/>
+        <path d="M15 60V20l18 26 18-26v40" stroke="#25d366" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M51 38h16a5 5 0 0 1 0 10H51v-10z" fill="#00a884"/>
+        <circle cx="59" cy="43" r="2.5" fill="#111b21"/>
+        <path d="M51 38v-8a4 4 0 0 1 8 0v3" stroke="#25d366" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="ce-title">NexWA</div>
+      <div class="ce-sub">Pilih percakapan untuk mulai chat</div>
+    </div>
+
+    <div id="chatMain" style="display:none;flex-direction:column;height:100%">
+      <div class="chat-header">
+        <div class="ch-avatar" id="chHeaderAvatar" onclick="openInfoPanel()">?</div>
+        <div class="ch-info" onclick="openInfoPanel()">
+          <div class="ch-name" id="chHeaderName">-</div>
+          <div class="ch-status" id="chHeaderStatus">-</div>
+        </div>
+        <div class="ch-actions">
+          <button class="icon-btn" onclick="openInfoPanel()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </button>
+          <button class="icon-btn" onclick="closeChat()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="messages-wrap" id="messagesWrap"></div>
+      <div class="typing-bar" id="typingBar"><div class="typing-dots"><span></span><span></span><span></span></div><span id="typingName">mengetik...</span></div>
+      <div class="input-area">
+        <div class="reply-bar" id="replyBar">
+          <div class="rb-content"><div class="rb-author" id="rbAuthor"></div><div class="rb-text" id="rbText"></div></div>
+          <span class="rb-close" onclick="clearReply()">✕</span>
+        </div>
+        <div class="attach-menu" id="attachMenu">
+          <div class="attach-item" onclick="document.getElementById('fileImage').click()"><span>🖼️</span> Foto</div>
+          <div class="attach-item" onclick="document.getElementById('fileVideo').click()"><span>🎬</span> Video</div>
+          <div class="attach-item" onclick="document.getElementById('fileAudio').click()"><span>🎵</span> Audio</div>
+          <div class="attach-item" onclick="document.getElementById('fileDoc').click()"><span>📄</span> Dokumen</div>
+        </div>
+        <input type="file" id="fileImage" accept="image/*" onchange="handleFile(this,'image')">
+        <input type="file" id="fileVideo" accept="video/*" onchange="handleFile(this,'video')">
+        <input type="file" id="fileAudio" accept="audio/*" onchange="handleFile(this,'audio')">
+        <input type="file" id="fileDoc" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" onchange="handleFile(this,'document')">
+        <div class="input-row">
+          <button class="attach-btn" onclick="toggleAttach()">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <div class="input-box">
+            <textarea class="msg-input" id="msgInput" placeholder="Ketik pesan" rows="1"></textarea>
+          </div>
+          <button class="send-btn" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANNEL VIEW -->
+    <div id="channelView" style="display:none;flex-direction:column;height:100%">
+      <div class="chat-header">
+        <div class="ch-avatar" id="cvAvatar">📢</div>
+        <div class="ch-info"><div class="ch-name" id="cvName">-</div><div class="ch-status" id="cvSubs">-</div></div>
+        <div id="cvFollowBtn"></div>
+        <button class="icon-btn" onclick="closeChannelView()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="messages-wrap" id="cvMessages"></div>
+      <div class="input-area" id="cvInputArea" style="display:none">
+        <div class="input-row">
+          <div class="input-box" style="flex:1"><textarea class="msg-input" id="cvInput" placeholder="Kirim ke channel..." rows="1"></textarea></div>
+          <button class="send-btn" onclick="sendChannelMsg()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div class="ip-header">
+      <button class="icon-btn" onclick="closeInfoPanel()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="ip-title">Info Kontak</div>
+    </div>
+    <div id="ipBannerWrap"></div>
+    <div class="ip-avatar-wrap">
+      <div class="ip-avatar" id="ipAvatar">?</div>
+      <div class="ip-name" id="ipName">-</div>
+      <div class="ip-phone" id="ipPhone">-</div>
+      <div class="ip-bio" id="ipBio"></div>
+    </div>
+    <div class="ip-section">
+      <div class="ip-section-title">Nama Kontak (lokal)</div>
+      <input class="ip-input" id="contactNick" placeholder="Simpan nama panggilan...">
+      <button class="ip-save" onclick="saveNick()">Simpan</button>
+    </div>
+    <div class="ip-actions">
+      <button class="ip-btn block" id="blockBtn" onclick="toggleBlock()">🚫 <span id="blockLabel">Blokir</span></button>
+      <button class="ip-btn report" onclick="openReport()">⚠️ Laporkan</button>
+      <button class="ip-btn del" onclick="deleteChat()">🗑️ Hapus Chat</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sb-header">
+    <button class="icon-btn" onclick="closeSidebar()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="sb-title">Akun</div>
+  </div>
+  <div class="sb-avatar-wrap" onclick="document.getElementById('avatarInput').click()">
+    <div class="sb-avatar" id="sbAvatar">?</div>
+    <div class="sb-edit-badge">✏️</div>
+  </div>
+  <input type="file" id="avatarInput" accept="image/*" onchange="uploadAvatar(this)">
+  <div class="sb-phone" id="sbPhone"></div>
+  <div class="sb-verify-badges" id="sbVerifyBadges"></div>
+  <div class="sb-section">
+    <div class="sb-section-title">Nama Tampilan</div>
+    <input class="sb-input" id="editName" placeholder="Nama kamu">
+    <div class="sb-section-title">Username</div>
+    <input class="sb-input" id="editUsername" placeholder="username">
+    <div class="sb-section-title">Bio</div>
+    <input class="sb-input" id="editBio" placeholder="Bio singkat...">
+    <button class="sb-save" onclick="saveProfile()">💾 Simpan Profil</button>
+    <div class="sb-saved" id="profileSaved">✅ Profil disimpan!</div>
+  </div>
+  <button class="sb-logout" onclick="logout()">🚪 Keluar</button>
+</div>
+
+<!-- ══ MAILBOX POPUP ══ -->
+<div class="mailbox-popup" id="mailboxPopup">
+  <div class="mbox-header">
+    <span style="font-size:18px">📬</span>
+    <div class="mbox-title">Kotak Masuk</div>
+    <button class="icon-btn" onclick="toggleMailbox()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="mbox-body" id="mboxBody"><div class="mail-empty">Tidak ada pesan</div></div>
+</div>
+
+<!-- ══ FIND USER ══ -->
+<div class="find-modal" id="findModal">
+  <div class="find-box">
+    <div class="find-header">
+      <div class="find-title">Cari Pengguna</div>
+      <button class="icon-btn" onclick="closeFind()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <input class="find-input" id="findInput" placeholder="Cari username atau nama..." oninput="searchUsers()">
+    <div class="find-results" id="findResults"><div class="find-empty">Ketik untuk mencari</div></div>
+  </div>
+</div>
+
+<!-- ══ CREATE CHANNEL ══ -->
+<div class="modal" id="createChModal">
+  <div class="modal-box">
+    <div class="modal-title">📢 Buat Channel</div>
+    <input class="modal-input" id="chNameInput" placeholder="Nama channel">
+    <textarea class="modal-textarea" id="chDescInput" placeholder="Deskripsi..."></textarea>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('createChModal')">Batal</button>
+      <button class="modal-submit" onclick="createChannel()">Buat</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REPORT ══ -->
+<div class="modal" id="reportModal">
+  <div class="modal-box">
+    <div class="modal-title">⚠️ Laporkan Pengguna</div>
+    <div class="report-opts" id="reportOpts">
+      <div class="report-opt" onclick="selReport(this,'Spam')">📧 Spam</div>
+      <div class="report-opt" onclick="selReport(this,'Konten Tidak Pantas')">🚫 Konten Tidak Pantas</div>
+      <div class="report-opt" onclick="selReport(this,'Pelecehan')">😤 Pelecehan / Bullying</div>
+      <div class="report-opt" onclick="selReport(this,'Penipuan')">💸 Penipuan</div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('reportModal')">Batal</button>
+      <button class="modal-submit" onclick="submitReport()">Laporkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APPEAL ══ -->
+<div class="appeal-modal" id="appealModal">
+  <div class="appeal-box">
+    <div style="font-size:18px;font-weight:700">📝 Ajukan Banding</div>
+    <div style="font-size:13px;color:var(--text-muted);line-height:1.5">Jelaskan mengapa akun kamu seharusnya tidak diblokir. Tim kami akan meninjau dalam 1-3 hari kerja.</div>
+    <textarea class="appeal-textarea" id="appealText" placeholder="Tulis pesan banding..."></textarea>
+    <div class="appeal-btns">
+      <button class="ap-cancel" onclick="closeAppeal()">Batal</button>
+      <button class="ap-submit" onclick="submitAppeal()">Kirim Banding</button>
+    </div>
+    <div class="ap-success" id="appealSuccess">✅ Banding terkirim! Kami akan segera merespons.</div>
+  </div>
+</div>
+
+<!-- ══ CS FAB + PANEL ══ -->
+<button class="cs-fab" id="csFab" onclick="toggleCS()" title="Customer Service">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="2">
+    <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10a10 10 0 0 1-10-10C2 6.48 6.48 2 12 2z"/>
+    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+    <circle cx="9" cy="10" r="1" fill="white"/>
+    <circle cx="15" cy="10" r="1" fill="white"/>
+  </svg>
+  <div class="cs-notif-dot" id="csNotifDot"></div>
+</button>
+
+<div class="cs-panel" id="csPanel">
+  <div class="cs-panel-header">
+    <div class="cs-panel-avatar">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2">
+        <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10a10 10 0 0 1-10-10C2 6.48 6.48 2 12 2z"/>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1" fill="white"/><circle cx="15" cy="10" r="1" fill="white"/>
+      </svg>
+    </div>
+    <div class="cs-panel-info">
+      <div class="cs-panel-name">NexWA Support</div>
+      <div class="cs-panel-status">● Online</div>
+    </div>
+    <button class="icon-btn" onclick="toggleCS()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="cs-body" id="csBody">
+    <!-- Category screen -->
+    <div id="csCatScreen">
+      <div class="cs-category-title">Halo! Ada yang bisa kami bantu? Pilih topik:</div>
+      <div class="cs-cat-grid">
+        <div class="cs-cat-btn" onclick="selectCSCat(this,'Kritik & Saran')"><div class="cs-cat-icon">💡</div>Kritik & Saran</div>
+        <div class="cs-cat-btn" onclick="selectCSCat(this,'Masalah Teknis')"><div class="cs-cat-icon">🔧</div>Masalah Teknis</div>
+        <div class="cs-cat-btn" onclick="selectCSCat(this,'Pertanyaan Umum')"><div class="cs-cat-icon">❓</div>Pertanyaan Umum</div>
+        <div class="cs-cat-btn" onclick="selectCSCat(this,'Pemasukan / Ide')"><div class="cs-cat-icon">🚀</div>Ide & Pemasukan</div>
+        <div class="cs-cat-btn" onclick="selectCSCat(this,'Lainnya')"><div class="cs-cat-icon">📝</div>Lainnya</div>
+      </div>
+      <button class="cs-start-btn" id="csStartBtn" onclick="startCSChat()">Mulai Chat →</button>
+    </div>
+    <!-- Chat screen -->
+    <div class="cs-chat-screen" id="csChatScreen">
+      <div class="cs-messages" id="csMessages"></div>
+      <div class="cs-input-wrap">
+        <textarea class="cs-input" id="csInput" placeholder="Tulis pesanmu..." rows="1"></textarea>
+        <button class="cs-send-btn" onclick="sendCSMsg()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NOTIF ══ -->
+<div class="notif-container" id="notifContainer"></div>
+<div class="notif-banner-bar" id="notifBanner" style="display:none">
+  <span style="font-size:22px">🔔</span>
+  <div style="flex:1;font-size:13px;line-height:1.4"><strong style="color:var(--accent2)">Aktifkan Notifikasi</strong><br><span style="color:var(--text-muted)">Terima notifikasi pesan masuk</span></div>
+  <button class="notif-allow-btn" onclick="reqNotif()">Aktifkan</button>
+  <button class="notif-dismiss-btn" onclick="dismissNotif()">✕</button>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img id="lbImg" src=""></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+// ── CONFIG ────────────────────────────────────────────────────
+const SUPABASE_URL = "https://bbbwmqbriqmobxekuzca.supabase.co"
+const SUPABASE_KEY = "sb_publishable_zh2AADu4LH6splk2HNp3EA_0s8xMUDP"
+// ─────────────────────────────────────────────────────────────
+
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+let ME = null, activeChat = null, activeChannel = null
+let chats = [], channels = [], csTicketId = null, csCategory = null
+let mailboxRead = new Set(JSON.parse(localStorage.getItem('nw_read')||'[]'))
+let contacts    = JSON.parse(localStorage.getItem('nw_contacts')||'{}')
+let reportTarget = null, reportReason = null, replyTo = null
+let msgCh = null, typingCh = null, typingTimer = null, typingSent = false
+let unreadCounts = {}, notifSound = null
+
+// ── UTILS ─────────────────────────────────────────────────────
+const esc   = s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+const fmt   = ts=>new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})
+const fmtD  = ts=>{const d=new Date(ts),n=new Date();if(d.toDateString()===n.toDateString())return fmt(ts);const y=new Date(n-86400000);if(d.toDateString()===y.toDateString())return'Kemarin';return d.toLocaleDateString('id-ID',{day:'numeric',month:'short'})}
+const scrollB= ()=>{const w=document.getElementById('messagesWrap');if(w)w.scrollTop=w.scrollHeight}
+const ar    = el=>{el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px'}
+const fmtSz = b=>{if(!b)return'';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB'}
+const getName=(uid,fb)=>contacts[uid]||fb
+
+function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
+
+// ── VERIFY BADGE HTML ─────────────────────────────────────────
+function verifyBadge(prof) {
+  let h=''
+  if(prof?.verified_green) h+=`<span class="badge-verify badge-green" title="Terverifikasi"><svg viewBox="0 0 12 12" fill="white"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span>`
+  if(prof?.verified_blue)  h+=`<span class="badge-verify badge-blue" title="Kreator"><svg viewBox="0 0 12 12" fill="white"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span>`
+  if(prof?.verified_gold)  h+=`<span class="badge-verify badge-gold" title="Premium"><svg viewBox="0 0 12 12" fill="white"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span>`
+  return h
+}
+
+function verifyBanner(prof) {
+  if(prof?.banner_gold) return `<div class="verify-banner gold"><span class="banner-icon">✦</span>TERVERIFIKASI AMAN<span class="banner-icon">✦</span></div>`
+  if(prof?.banner_blue) return `<div class="verify-banner blue"><span class="banner-icon">◈</span>TERVERIFIKASI TERPERCAYA<span class="banner-icon">◈</span></div>`
+  return ''
+}
+
+// ── AUTH ──────────────────────────────────────────────────────
+window.switchTab = tab=>{
+  const isL=tab==='login'
+  document.getElementById('tabLogin').classList.toggle('active',isL)
+  document.getElementById('tabRegister').classList.toggle('active',!isL)
+  document.getElementById('authBtn').textContent=isL?'Masuk':'Daftar'
+  document.getElementById('regFields').style.display=isL?'none':'flex'
+  document.getElementById('authErr').textContent=''
+}
+
+window.handleAuth = async()=>{
+  const btn=document.getElementById('authBtn')
+  const rawPhone=document.getElementById('authPhone').value.trim()
+  const code=document.getElementById('countryCode').value.trim()
+  const pass=document.getElementById('authPass').value
+  const err=document.getElementById('authErr')
+  err.textContent=''
+  if(!rawPhone||!pass){err.textContent='Isi nomor & password';return}
+  const cleanPhone=rawPhone.replace(/^0+/,'')
+  const phone=code+cleanPhone
+  const email=phone.replace('+','')+'@nexwa.app'
+  const isL=document.getElementById('tabLogin').classList.contains('active')
+  btn.disabled=true; btn.textContent='⏳ Memproses...'
+  try{
+    if(isL){
+      const{data,error}=await sb.auth.signInWithPassword({email,password:pass})
+      if(error){err.textContent='Nomor atau password salah';return}
+      // Verifikasi paksa jika belum confirmed
+      if(!data.user.email_confirmed_at){
+        await sb.rpc||null
+      }
+      await loadProfile(data.user.id)
+    }else{
+      const name=document.getElementById('regName').value.trim()
+      const uname=document.getElementById('regUsername').value.trim().replace('@','').replace(/\s/g,'').toLowerCase()
+      if(!name){err.textContent='Isi nama lengkap';return}
+      if(!uname||uname.length<3){err.textContent='Username minimal 3 karakter';return}
+      const{data:ex}=await sb.from('profiles').select('id').eq('username',uname).maybeSingle()
+      if(ex){err.textContent='Username sudah dipakai';return}
+      const{data:ph}=await sb.from('profiles').select('id').eq('phone',phone).maybeSingle()
+      if(ph){err.textContent='Nomor sudah terdaftar, silakan login';return}
+      const{data,error}=await sb.auth.signUp({email,password:pass})
+      if(error){err.textContent=error.message;return}
+      if(!data?.user){err.textContent='Gagal membuat akun';return}
+      await sb.from('profiles').upsert({id:data.user.id,phone,username:uname,display_name:name,bio:'',role:'user',banned:false})
+      await loadProfile(data.user.id)
+    }
+  }catch(e){err.textContent='Error: '+e.message}
+  finally{btn.disabled=false;btn.textContent=isL?'Masuk':'Daftar'}
+}
+
+// Enter key
+;['authPhone','authPass','regName','regUsername'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter')handleAuth()})
+})
+
+async function init(){
+  const{data:{session}}=await sb.auth.getSession()
+  if(session) await loadProfile(session.user.id)
+}
+
+async function loadProfile(uid,retry=0){
+  if(retry>6){await sb.auth.signOut();location.reload();return}
+  const{data:p}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle()
+  if(!p){setTimeout(()=>loadProfile(uid,retry+1),700);return}
+  if(p.banned){
+    document.getElementById('authScreen').style.display='none'
+    document.getElementById('bannedScreen').classList.add('show')
+    document.getElementById('bannedReason').textContent='Alasan: '+(p.banned_reason||'Pelanggaran S&K')
+    ME=p;return
+  }
+  ME=p
+  document.getElementById('authScreen').style.display='none'
+  document.getElementById('app').style.display='flex'
+  startApp()
+}
+
+// ── START ─────────────────────────────────────────────────────
+async function startApp(){
+  updateSidebarUI()
+  initNotifSound()
+  await loadChats()
+  await loadMailbox()
+  await loadChannels()
+  subscribeGlobal()
+  subscribeProfiles()
+  showNotifBanner()
+}
+
+function updateSidebarUI(){
+  document.getElementById('sbPhone').textContent=ME.phone||''
+  document.getElementById('editName').value=ME.display_name||''
+  document.getElementById('editUsername').value=ME.username||''
+  document.getElementById('editBio').value=ME.bio||''
+  setAv('sbAvatar',ME.avatar_url,ME.display_name)
+  // Show verification badges
+  const wrap=document.getElementById('sbVerifyBadges'); wrap.innerHTML=''
+  if(ME.verified_green) wrap.innerHTML+=`<div class="sb-verify-item green">✓ Terverifikasi</div>`
+  if(ME.verified_blue)  wrap.innerHTML+=`<div class="sb-verify-item blue">✓ Kreator</div>`
+  if(ME.verified_gold)  wrap.innerHTML+=`<div class="sb-verify-item gold">★ Premium</div>`
+}
+
+function setAv(id,url,name){
+  const el=document.getElementById(id);if(!el)return
+  if(url)el.innerHTML=`<img src="${url}" onerror="this.parentElement.textContent='${(name||'?')[0].toUpperCase()}'">`;
+  else el.textContent=(name||'?')[0].toUpperCase()
+}
+
+// ── CHATS ─────────────────────────────────────────────────────
+async function loadChats(){
+  const{data}=await sb.from('chats').select(`*,
+    user_a_profile:profiles!chats_user_a_fkey(id,display_name,username,avatar_url,phone,verified_green,verified_blue,verified_gold,banner_blue,banner_gold),
+    user_b_profile:profiles!chats_user_b_fkey(id,display_name,username,avatar_url,phone,verified_green,verified_blue,verified_gold,banner_blue,banner_gold)
+  `).or(`user_a.eq.${ME.id},user_b.eq.${ME.id}`).order('last_message_at',{ascending:false})
+  chats=data||[]; renderChatList()
+}
+
+function getOther(c){return c.user_a===ME.id?c.user_b_profile:c.user_a_profile}
+
+function renderChatList(q=''){
+  const list=document.getElementById('chatList')
+  let items=chats
+  if(q)items=chats.filter(c=>{const o=getOther(c),n=getName(o?.id,o?.display_name)||'';return n.toLowerCase().includes(q.toLowerCase())||(o?.username||'').includes(q.toLowerCase())})
+  if(!items.length){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px">Belum ada chat</div>';return}
+  list.innerHTML=''
+  items.forEach(c=>{
+    const o=getOther(c); if(!o)return
+    const name=getName(o.id,o.display_name)||o.username||o.phone||'User'
+    const unread=unreadCounts[c.id]||0
+    const div=document.createElement('div')
+    div.className='chat-item'+(activeChat?.chat_id===c.id?' active':'')
+    div.onclick=()=>openChat(c.id,o)
+    div.innerHTML=`
+      <div class="ci-avatar">${o.avatar_url?`<img src="${o.avatar_url}">`:(name[0]||'?').toUpperCase()}</div>
+      <div class="ci-info">
+        <div class="ci-name"><span class="ci-name-text">${esc(name)}</span>${verifyBadge(o)}</div>
+        <div class="ci-preview">${esc(c.last_message||'Mulai percakapan')}</div>
+      </div>
+      <div class="ci-meta">
+        <div class="ci-time">${fmtD(c.last_message_at)}</div>
+        ${unread>0?`<div class="unread-pill">${unread}</div>`:''}
+      </div>`
+    list.appendChild(div)
+  })
+}
+
+window.filterChats=()=>renderChatList(document.getElementById('searchChats').value)
+
+// ── OPEN CHAT ─────────────────────────────────────────────────
+async function openChat(chatId, other){
+  if(unreadCounts[chatId]){delete unreadCounts[chatId];updateTabTitle()}
+  activeChat={chat_id:chatId,other}
+  document.getElementById('chatEmpty').style.display='none'
+  document.getElementById('chatMain').style.display='flex'
+  document.getElementById('chatMain').style.flexDirection='column'
+  document.getElementById('channelView').style.display='none'
+  const name=getName(other.id,other.display_name)||other.username||other.phone||'User'
+  const ha=document.getElementById('chHeaderAvatar')
+  if(other.avatar_url)ha.innerHTML=`<img src="${other.avatar_url}">`;else ha.textContent=(name[0]||'?').toUpperCase()
+  document.getElementById('chHeaderName').innerHTML=esc(name)+verifyBadge(other)
+  document.getElementById('chHeaderStatus').textContent='@'+(other.username||other.phone||'')
+  renderChatList()
+  await loadMsgs(chatId)
+  if(msgCh) await sb.removeChannel(msgCh)
+  if(typingCh) await sb.removeChannel(typingCh)
+  msgCh=sb.channel('m-'+chatId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`chat_id=eq.${chatId}`},p=>{
+      if(!document.getElementById('msg-'+p.new.id)){renderMsg(p.new);scrollB()}
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages',filter:`chat_id=eq.${chatId}`},p=>{
+      const el=document.getElementById('msg-'+p.new.id);if(el)el.innerHTML=buildMsg(p.new)
+    })
+    .subscribe()
+  typingCh=sb.channel('t-'+chatId)
+    .on('broadcast',{event:'typing'},p=>{
+      if(p.payload?.from!==ME.id){
+        document.getElementById('typingBar').classList.add('show')
+        clearTimeout(typingTimer)
+        typingTimer=setTimeout(()=>document.getElementById('typingBar').classList.remove('show'),3000)
+        scrollB()
+      }
+    }).subscribe()
+}
+
+async function loadMsgs(chatId){
+  const{data}=await sb.from('messages').select('*').eq('chat_id',chatId).order('created_at',{ascending:true})
+  const wrap=document.getElementById('messagesWrap');wrap.innerHTML=''
+  let lastD=''
+  ;(data||[]).forEach(m=>{
+    const d=new Date(m.created_at).toDateString()
+    if(d!==lastD){lastD=d;const sep=document.createElement('div');sep.className='msg-date-sep';sep.innerHTML=`<span>${new Date(m.created_at).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'})}</span>`;wrap.appendChild(sep)}
+    renderMsg(m,false)
+  })
+  scrollB()
+  await sb.from('messages').update({read_by:[ME.id]}).eq('chat_id',chatId).neq('sender_id',ME.id)
+}
+
+function renderMsg(msg,scroll=true){
+  const wrap=document.getElementById('messagesWrap');if(!wrap)return
+  const ex=document.getElementById('msg-'+msg.id);if(ex)return
+  const div=document.createElement('div');div.id='msg-'+msg.id;div.innerHTML=buildMsg(msg)
+  wrap.appendChild(div);if(scroll)scrollB()
+}
+
+function buildMsg(msg){
+  const isOut=msg.sender_id===ME.id
+  const cls=isOut?'out':'in'
+  const isRead=Array.isArray(msg.read_by)&&msg.read_by.includes(activeChat?.other?.id)
+  let h=''
+  if(msg.deleted){
+    h=`<div class="msg-row ${cls}"><div class="msg-bubble deleted">🚫 Pesan dihapus</div></div>`
+  }else{
+    const cSafe=(msg.content||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n')
+    h=`<div class="msg-row ${cls}">`
+    h+=`<div class="msg-bubble">`
+    if(msg.file_url){
+      if(msg.file_type==='image') h+=`<div class="msg-media"><img src="${msg.file_url}" onclick="openLb('${msg.file_url}')" loading="lazy"></div>`
+      else if(msg.file_type==='video') h+=`<div class="msg-media"><video src="${msg.file_url}" controls></video></div>`
+      else if(msg.file_type==='audio') h+=`<div class="msg-media"><audio src="${msg.file_url}" controls></audio></div>`
+      else h+=`<div class="msg-file" onclick="window.open('${msg.file_url}')"><div class="msg-file-icon">📄</div><div><div class="msg-file-name">${esc(msg.file_name||'File')}</div><div class="msg-file-size">${fmtSz(msg.file_size)}</div></div></div>`
+    }
+    if(msg.content) h+=esc(msg.content)
+    h+=`<div class="msg-footer">${msg.edited?'<span class="msg-edited">diedit</span>':''}<span class="msg-time">${fmt(msg.created_at)}</span>${isOut?`<span class="msg-status ${isRead?'read':'sent'}">${isRead?'✓✓':'✓'}</span>`:''}</div>`
+    h+=`</div>`
+    h+=`<div class="msg-actions">`
+    h+=`<div class="msg-act" onclick="setReply('${msg.id}','${cSafe}','${isOut?'Kamu':esc(getName(msg.sender_id,'')||'')}')"  >↩ Balas</div>`
+    if(isOut){
+      h+=`<div class="msg-act" onclick="editMsg('${msg.id}','${cSafe}')">✏️ Edit</div>`
+      h+=`<div class="msg-act danger" onclick="delMsg('${msg.id}')">🗑 Hapus</div>`
+    }
+    h+=`</div></div>`
+  }
+  return h
+}
+
+// ── SEND — optimistic (langsung tampil sebelum DB confirm) ─────
+window.sendMessage=async()=>{
+  if(!activeChat)return
+  const input=document.getElementById('msgInput')
+  const text=input.value.trim()
+  if(!text&&!pendingFile)return
+  // Optimistic render
+  const tempId='temp-'+Date.now()
+  const tempMsg={id:tempId,chat_id:activeChat.chat_id,sender_id:ME.id,content:text||null,file_url:null,file_type:null,file_name:null,file_size:null,deleted:false,edited:false,read_by:[],created_at:new Date().toISOString()}
+  renderMsg(tempMsg); scrollB()
+  input.value=''; input.style.height='auto'; clearReply(); closeAttach()
+
+  let file_url=null,file_type=null,file_name=null,file_size=null
+  if(pendingFile){
+    const r=await uploadFile(pendingFile.file,pendingFile.type)
+    file_url=r?.url;file_type=pendingFile.type;file_name=pendingFile.file.name;file_size=pendingFile.file.size
+    clearPendingFile()
+  }
+  const{data:saved,error}=await sb.from('messages').insert({chat_id:activeChat.chat_id,sender_id:ME.id,content:text||null,file_url,file_type,file_name,file_size,deleted:false,edited:false}).select().single()
+  // Ganti temp dengan yang real
+  const tempEl=document.getElementById('msg-'+tempId)
+  if(tempEl){
+    if(saved){tempEl.id='msg-'+saved.id;tempEl.innerHTML=buildMsg(saved)}
+    else tempEl.remove()
+  }
+  if(error)toast('Gagal kirim pesan')
+  else{
+    await sb.from('chats').update({last_message:text||`[${file_type||'file'}]`,last_message_at:new Date().toISOString()}).eq('id',activeChat.chat_id)
+    loadChats()
+  }
+  broadcastTyping()
+}
+
+// ── TYPING ─────────────────────────────────────────────────────
+function broadcastTyping(){
+  if(!typingSent&&typingCh&&activeChat){
+    typingSent=true
+    typingCh.send({type:'broadcast',event:'typing',payload:{from:ME.id}})
+    setTimeout(()=>typingSent=false,2000)
+  }
+}
+
+const msgInput=document.getElementById('msgInput')
+msgInput.addEventListener('input',e=>{ar(e.target);broadcastTyping();closeAttach()})
+msgInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}})
+
+// ── EDIT / DELETE ──────────────────────────────────────────────
+window.editMsg=async(id,cur)=>{const nt=prompt('Edit pesan:',cur);if(!nt||nt===cur)return;await sb.from('messages').update({content:nt,edited:true}).eq('id',id)}
+window.delMsg=async id=>{if(!confirm('Hapus pesan?'))return;await sb.from('messages').update({deleted:true,content:null,file_url:null}).eq('id',id)}
+
+// ── REPLY ──────────────────────────────────────────────────────
+window.setReply=(id,text,author)=>{
+  replyTo={id,text,author}
+  document.getElementById('rbAuthor').textContent=author
+  document.getElementById('rbText').textContent=text
+  document.getElementById('replyBar').classList.add('show')
+  document.getElementById('msgInput').focus()
+}
+window.clearReply=()=>{replyTo=null;document.getElementById('replyBar').classList.remove('show')}
+
+// ── FILE ───────────────────────────────────────────────────────
+let pendingFile=null
+window.handleFile=(input,type)=>{const f=input.files[0];if(!f)return;pendingFile={file:f,type};toast(`📎 ${f.name} siap dikirim`);closeAttach();input.value=''}
+function clearPendingFile(){pendingFile=null}
+async function uploadFile(file,type){
+  const path=`${ME.id}/${Date.now()}-${file.name.replace(/\s/g,'_')}`
+  const{error}=await sb.storage.from('nexwa-media').upload(path,file,{upsert:true})
+  if(error){toast('Upload gagal');return null}
+  return{url:sb.storage.from('nexwa-media').getPublicUrl(path).data.publicUrl}
+}
+
+// ── ATTACH ─────────────────────────────────────────────────────
+window.toggleAttach=()=>document.getElementById('attachMenu').classList.toggle('open')
+function closeAttach(){document.getElementById('attachMenu').classList.remove('open')}
+document.addEventListener('click',e=>{if(!e.target.closest('.attach-btn')&&!e.target.closest('.attach-menu'))closeAttach()})
+
+// ── FIND USER ─────────────────────────────────────────────────
+window.openFind=()=>{document.getElementById('findModal').classList.add('open');document.getElementById('findInput').value='';document.getElementById('findResults').innerHTML='<div class="find-empty">Ketik untuk mencari</div>'}
+window.closeFind=()=>document.getElementById('findModal').classList.remove('open')
+window.searchUsers=async()=>{
+  const q=document.getElementById('findInput').value.trim()
+  if(!q){document.getElementById('findResults').innerHTML='<div class="find-empty">Ketik untuk mencari</div>';return}
+  const{data}=await sb.from('profiles').select('*').or(`username.ilike.%${q}%,display_name.ilike.%${q}%`).neq('id',ME.id).limit(10)
+  const res=document.getElementById('findResults')
+  if(!data?.length){res.innerHTML='<div class="find-empty">Tidak ditemukan</div>';return}
+  res.innerHTML=''
+  data.forEach(u=>{
+    const div=document.createElement('div');div.className='find-user-item';div.onclick=()=>startChatWith(u)
+    div.innerHTML=`<div class="find-avatar">${u.avatar_url?`<img src="${u.avatar_url}">`:(u.display_name||'?')[0].toUpperCase()}</div>
+      <div><div style="font-size:14px;font-weight:500;display:flex;align-items:center;gap:4px">${esc(u.display_name||u.username)}${verifyBadge(u)}</div>
+      <div style="font-size:12px;color:var(--text-muted)">@${esc(u.username||'')} · ${esc(u.phone||'')}</div></div>`
+    res.appendChild(div)
+  })
+}
+
+async function startChatWith(user){
+  closeFind()
+  let{data:ex}=await sb.from('chats').select('*').or(`and(user_a.eq.${ME.id},user_b.eq.${user.id}),and(user_a.eq.${user.id},user_b.eq.${ME.id})`).maybeSingle()
+  if(!ex){const{data:nc}=await sb.from('chats').insert({user_a:ME.id,user_b:user.id}).select().single();ex=nc}
+  await loadChats()
+  const full=chats.find(c=>c.id===ex.id)
+  openChat(ex.id,full?getOther(full):user)
+}
+
+// ── INFO PANEL ─────────────────────────────────────────────────
+window.openInfoPanel=async()=>{
+  if(!activeChat)return
+  const u=activeChat.other
+  document.getElementById('infoPanel').classList.add('open')
+  const name=getName(u.id,u.display_name)||u.username||u.phone
+  document.getElementById('ipName').innerHTML=esc(name)+verifyBadge(u)
+  document.getElementById('ipPhone').textContent=u.phone||''
+  const ia=document.getElementById('ipAvatar')
+  if(u.avatar_url)ia.innerHTML=`<img src="${u.avatar_url}">`;else ia.textContent=(name[0]||'?').toUpperCase()
+  const{data:p}=await sb.from('profiles').select('bio,verified_green,verified_blue,verified_gold,banner_blue,banner_gold').eq('id',u.id).maybeSingle()
+  document.getElementById('ipBio').textContent=p?.bio||''
+  document.getElementById('ipBannerWrap').innerHTML=verifyBanner({...u,...p})
+  document.getElementById('contactNick').value=contacts[u.id]||''
+  const{data:blk}=await sb.from('blocks').select('id').eq('blocker_id',ME.id).eq('blocked_id',u.id).maybeSingle()
+  document.getElementById('blockLabel').textContent=blk?'Buka Blokir':'Blokir'
+}
+window.closeInfoPanel=()=>document.getElementById('infoPanel').classList.remove('open')
+
+window.saveNick=()=>{
+  if(!activeChat)return
+  contacts[activeChat.other.id]=document.getElementById('contactNick').value.trim()
+  localStorage.setItem('nw_contacts',JSON.stringify(contacts))
+  toast('✅ Nama kontak disimpan'); loadChats()
+}
+
+window.toggleBlock=async()=>{
+  const uid=activeChat?.other?.id;if(!uid)return
+  const{data:blk}=await sb.from('blocks').select('id').eq('blocker_id',ME.id).eq('blocked_id',uid).maybeSingle()
+  if(blk){await sb.from('blocks').delete().eq('id',blk.id);document.getElementById('blockLabel').textContent='Blokir';toast('✅ Blokir dibuka')}
+  else{await sb.from('blocks').insert({blocker_id:ME.id,blocked_id:uid});document.getElementById('blockLabel').textContent='Buka Blokir';toast('🚫 Pengguna diblokir')}
+}
+
+window.deleteChat=async()=>{
+  if(!activeChat||!confirm('Hapus semua pesan?'))return
+  await sb.from('messages').delete().eq('chat_id',activeChat.chat_id)
+  await sb.from('chats').delete().eq('id',activeChat.chat_id)
+  chats=chats.filter(c=>c.id!==activeChat.chat_id); renderChatList()
+  closeInfoPanel(); closeChat(); toast('🗑️ Chat dihapus')
+}
+
+window.closeChat=()=>{
+  activeChat=null
+  document.getElementById('chatMain').style.display='none'
+  document.getElementById('chatEmpty').style.display='flex'
+  document.getElementById('infoPanel').classList.remove('open')
+  renderChatList()
+}
+
+// ── REPORT ─────────────────────────────────────────────────────
+window.openReport=()=>{reportTarget=activeChat?.other?.id;reportReason=null;document.querySelectorAll('.report-opt').forEach(o=>o.classList.remove('sel'));document.getElementById('reportModal').classList.add('open')}
+window.selReport=(el,r)=>{reportReason=r;document.querySelectorAll('.report-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel')}
+window.submitReport=async()=>{
+  if(!reportReason){toast('Pilih alasan');return}
+  await sb.from('reports').insert({reporter_id:ME.id,reported_id:reportTarget,reason:reportReason})
+  closeModal('reportModal');toast('✅ Laporan terkirim')
+}
+
+// ── PROFILE ────────────────────────────────────────────────────
+window.saveProfile=async()=>{
+  const name=document.getElementById('editName').value.trim()
+  const uname=document.getElementById('editUsername').value.trim().replace('@','').toLowerCase()
+  const bio=document.getElementById('editBio').value.trim()
+  if(!name||!uname){toast('Isi nama & username');return}
+  const{data:ex}=await sb.from('profiles').select('id').eq('username',uname).neq('id',ME.id).maybeSingle()
+  if(ex){toast('Username sudah dipakai');return}
+  await sb.from('profiles').update({display_name:name,username:uname,bio,updated_at:'now()'}).eq('id',ME.id)
+  ME.display_name=name;ME.username=uname;ME.bio=bio
+  const s=document.getElementById('profileSaved');s.classList.add('show');setTimeout(()=>s.classList.remove('show'),2500)
+}
+
+window.uploadAvatar=async input=>{
+  const f=input.files[0];if(!f)return
+  const path=`avatars/${ME.id}/${Date.now()}.${f.name.split('.').pop()}`
+  const{error}=await sb.storage.from('nexwa-avatars').upload(path,f,{upsert:true})
+  if(error){toast('Upload gagal');return}
+  const url=sb.storage.from('nexwa-avatars').getPublicUrl(path).data.publicUrl
+  await sb.from('profiles').update({avatar_url:url}).eq('id',ME.id)
+  ME.avatar_url=url; setAv('sbAvatar',url,ME.display_name); toast('✅ Foto diperbarui')
+}
+
+// ── MAILBOX ────────────────────────────────────────────────────
+async function loadMailbox(){
+  const{data}=await sb.from('mailbox').select('*').or(`user_id.eq.${ME.id},user_id.is.null`).order('created_at',{ascending:false})
+  const unread=(data||[]).filter(m=>!mailboxRead.has(m.id)).length
+  const badge=document.getElementById('mailboxBadge')
+  if(unread>0){badge.textContent=unread;badge.classList.add('show')}else badge.classList.remove('show')
+  renderMailbox(data||[])
+}
+
+function renderMailbox(mails){
+  const body=document.getElementById('mboxBody')
+  if(!mails.length){body.innerHTML='<div class="mail-empty">Tidak ada pesan</div>';return}
+  body.innerHTML=''
+  mails.forEach(m=>{
+    const isR=mailboxRead.has(m.id)
+    const div=document.createElement('div');div.className='mail-item '+(isR?'read':'unread')
+    div.onclick=()=>toggleMail(div,m)
+    div.innerHTML=`<div class="mail-item-title"><div class="mail-dot"></div>${esc(m.title)}</div>
+      <div class="mail-preview">${esc(m.content).substring(0,50)}...</div>
+      <div class="mail-time">${new Date(m.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short'})}</div>
+      <div class="mail-detail" id="md-${m.id}">
+        <div class="mail-detail-title">${esc(m.title)}</div>
+        <div class="mail-detail-content">${esc(m.content)}</div>
+        ${m.link?`<a class="mail-detail-link" href="${esc(m.link)}" target="_blank">🔗 Buka Link</a>`:''}
+      </div>`
+    body.appendChild(div)
+  })
+}
+
+function toggleMail(el,m){
+  const det=document.getElementById('md-'+m.id)
+  const was=det.classList.contains('show')
+  document.querySelectorAll('.mail-detail.show').forEach(d=>d.classList.remove('show'))
+  if(!was){
+    det.classList.add('show')
+    if(!mailboxRead.has(m.id)){
+      mailboxRead.add(m.id);localStorage.setItem('nw_read',JSON.stringify([...mailboxRead]))
+      el.classList.remove('unread');el.classList.add('read')
+      const b=document.getElementById('mailboxBadge'),c=parseInt(b.textContent)||0
+      if(c-1<=0)b.classList.remove('show');else b.textContent=c-1
+    }
+  }
+}
+
+window.toggleMailbox=()=>document.getElementById('mailboxPopup').classList.toggle('open')
+
+// ── CHANNELS ──────────────────────────────────────────────────
+async function loadChannels(){
+  const{data}=await sb.from('channels').select('*,channel_subscribers(user_id)').order('subscriber_count',{ascending:false})
+  channels=data||[]; renderChannelList()
+}
+
+function renderChannelList(){
+  const list=document.getElementById('channelList'); list.innerHTML=''
+  const hdr=document.createElement('div');hdr.style.cssText='padding:10px 14px;border-bottom:1px solid var(--border)'
+  hdr.innerHTML=`<button class="create-ch-btn" onclick="openModal('createChModal')">+ Buat Channel</button>`
+  list.appendChild(hdr)
+  if(!channels.length){const e=document.createElement('div');e.style.cssText='padding:24px;text-align:center;color:var(--text-muted);font-size:13px';e.textContent='Belum ada channel';list.appendChild(e);return}
+  channels.forEach(c=>{
+    const iF=c.channel_subscribers?.some(s=>s.user_id===ME.id)
+    const div=document.createElement('div');div.className='channel-item'
+    div.innerHTML=`<div class="ch-item-avatar">${c.avatar_url?`<img src="${c.avatar_url}">`:'📢'}</div>
+      <div style="flex:1;cursor:pointer;min-width:0" onclick="openChannel('${c.id}')"><div style="font-size:15px;font-weight:500">${esc(c.name)}</div><div style="font-size:12px;color:var(--text-muted)">${c.subscriber_count||0} pengikut</div></div>
+      <button class="ch-follow-btn ${iF?'following':''}" onclick="toggleFollow('${c.id}',${iF})">${iF?'✓ Diikuti':'Ikuti'}</button>`
+    list.appendChild(div)
+  })
+}
+
+window.toggleFollow=async(id,iF)=>{
+  if(iF)await sb.from('channel_subscribers').delete().eq('channel_id',id).eq('user_id',ME.id)
+  else await sb.from('channel_subscribers').insert({channel_id:id,user_id:ME.id})
+  const{count}=await sb.from('channel_subscribers').select('*',{count:'exact',head:true}).eq('channel_id',id)
+  await sb.from('channels').update({subscriber_count:count||0}).eq('id',id)
+  loadChannels()
+}
+
+window.openChannel=async chId=>{
+  const ch=channels.find(c=>c.id===chId);if(!ch)return
+  activeChannel=ch
+  document.getElementById('chatEmpty').style.display='none'
+  document.getElementById('chatMain').style.display='none'
+  document.getElementById('channelView').style.display='flex'
+  document.getElementById('channelView').style.flexDirection='column'
+  document.getElementById('cvAvatar').textContent='📢'
+  document.getElementById('cvName').textContent=ch.name
+  document.getElementById('cvSubs').textContent=(ch.subscriber_count||0)+' pengikut'
+  document.getElementById('cvInputArea').style.display=ch.owner_id===ME.id?'block':'none'
+  const{data}=await sb.from('channel_messages').select('*').eq('channel_id',chId).order('created_at',{ascending:true})
+  const wrap=document.getElementById('cvMessages');wrap.innerHTML=''
+  ;(data||[]).forEach(m=>{const d=document.createElement('div');d.className='msg-row in';d.innerHTML=`<div class="msg-bubble">${esc(m.content||'')}<div class="msg-footer"><span class="msg-time">${fmt(m.created_at)}</span></div></div>`;wrap.appendChild(d)})
+  wrap.scrollTop=wrap.scrollHeight
+  sb.channel('cv-'+chId).on('postgres_changes',{event:'INSERT',schema:'public',table:'channel_messages',filter:`channel_id=eq.${chId}`},p=>{
+    const d=document.createElement('div');d.className='msg-row in';d.innerHTML=`<div class="msg-bubble">${esc(p.new.content||'')}<div class="msg-footer"><span class="msg-time">${fmt(p.new.created_at)}</span></div></div>`;wrap.appendChild(d);wrap.scrollTop=wrap.scrollHeight
+  }).subscribe()
+}
+
+window.closeChannelView=()=>{activeChannel=null;document.getElementById('channelView').style.display='none';document.getElementById('chatEmpty').style.display='flex'}
+
+window.sendChannelMsg=async()=>{
+  if(!activeChannel)return
+  const inp=document.getElementById('cvInput'),t=inp.value.trim();if(!t)return
+  await sb.from('channel_messages').insert({channel_id:activeChannel.id,sender_id:ME.id,content:t})
+  inp.value=''
+}
+document.getElementById('cvInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChannelMsg()}})
+
+window.createChannel=async()=>{
+  const name=document.getElementById('chNameInput').value.trim()
+  if(!name){toast('Isi nama channel');return}
+  await sb.from('channels').insert({owner_id:ME.id,name,description:document.getElementById('chDescInput').value.trim(),subscriber_count:0})
+  closeModal('createChModal');document.getElementById('chNameInput').value='';document.getElementById('chDescInput').value=''
+  loadChannels();toast('✅ Channel dibuat!')
+}
+
+// ── CS WIDGET ─────────────────────────────────────────────────
+window.toggleCS=()=>document.getElementById('csPanel').classList.toggle('open')
+
+window.selectCSCat=(el,cat)=>{
+  csCategory=cat
+  document.querySelectorAll('.cs-cat-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel')
+  document.getElementById('csStartBtn').classList.add('show')
+}
+
+window.startCSChat=async()=>{
+  if(!csCategory)return
+  // Cek apakah sudah ada tiket open
+  const{data:ex}=await sb.from('cs_tickets').select('id').eq('user_id',ME.id).eq('status','open').maybeSingle()
+  if(ex){csTicketId=ex.id}else{
+    const{data:t}=await sb.from('cs_tickets').insert({user_id:ME.id,display_name:ME.display_name,phone:ME.phone,category:csCategory,status:'open'}).select().single()
+    csTicketId=t?.id
+    // Pesan otomatis sambutan
+    await sb.from('cs_messages').insert({ticket_id:csTicketId,sender:'developer',content:`Halo ${ME.display_name||''}! Terima kasih telah menghubungi NexWA Support. Kategori: *${csCategory}*. Tim kami akan segera membalas.`})
+  }
+  document.getElementById('csCatScreen').style.display='none'
+  document.getElementById('csChatScreen').classList.add('show')
+  await loadCSMsgs()
+  subscribeCS()
+}
+
+async function loadCSMsgs(){
+  if(!csTicketId)return
+  const{data}=await sb.from('cs_messages').select('*').eq('ticket_id',csTicketId).order('created_at',{ascending:true})
+  const wrap=document.getElementById('csMessages');wrap.innerHTML=''
+  ;(data||[]).forEach(m=>{
+    const div=document.createElement('div')
+    div.className='msg-row'
+    div.innerHTML=`<div class="cs-msg ${m.sender}">${esc(m.content)}<div class="cs-msg-time">${fmt(m.created_at)}</div></div>`
+    wrap.appendChild(div)
+  })
+  wrap.scrollTop=wrap.scrollHeight
+}
+
+window.sendCSMsg=async()=>{
+  if(!csTicketId)return
+  const inp=document.getElementById('csInput'),t=inp.value.trim();if(!t)return
+  inp.value=''
+  const{data}=await sb.from('cs_messages').insert({ticket_id:csTicketId,sender:'user',content:t}).select().single()
+  if(data){
+    const div=document.createElement('div');div.className='msg-row'
+    div.innerHTML=`<div class="cs-msg user">${esc(t)}<div class="cs-msg-time">${fmt(data.created_at)}</div></div>`
+    document.getElementById('csMessages').appendChild(div)
+    document.getElementById('csMessages').scrollTop=document.getElementById('csMessages').scrollHeight
+  }
+}
+document.getElementById('csInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCSMsg()}})
+document.getElementById('csInput').addEventListener('input',e=>ar(e.target))
+
+function subscribeCS(){
+  if(!csTicketId)return
+  sb.channel('cs-'+csTicketId).on('postgres_changes',{event:'INSERT',schema:'public',table:'cs_messages',filter:`ticket_id=eq.${csTicketId}`},p=>{
+    if(p.new.sender==='developer'){
+      const div=document.createElement('div');div.className='msg-row'
+      div.innerHTML=`<div class="cs-msg dev">${esc(p.new.content)}<div class="cs-msg-time">${fmt(p.new.created_at)}</div></div>`
+      const wrap=document.getElementById('csMessages');wrap.appendChild(div);wrap.scrollTop=wrap.scrollHeight
+      document.getElementById('csNotifDot').classList.add('show')
+      showNotif('NexWA Support','💬',p.new.content,null)
+    }
+  }).subscribe()
+}
+
+// ── SIDEBAR ────────────────────────────────────────────────────
+window.openSidebar=()=>{updateSidebarUI();document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open')}
+window.closeSidebar=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open')}
+window.logout=async()=>{await sb.auth.signOut();location.reload()}
+
+// ── APPEAL ─────────────────────────────────────────────────────
+window.openAppeal=()=>document.getElementById('appealModal').classList.add('open')
+window.closeAppeal=()=>document.getElementById('appealModal').classList.remove('open')
+window.submitAppeal=async()=>{
+  const msg=document.getElementById('appealText').value.trim()
+  if(!msg){toast('Tulis pesan banding');return}
+  await sb.from('appeals').insert({user_id:ME?.id||null,phone:ME?.phone||null,message:msg})
+  document.getElementById('appealSuccess').classList.add('show')
+  setTimeout(()=>closeAppeal(),3000)
+}
+
+// ── NAV TAB ────────────────────────────────────────────────────
+window.switchNavTab=(tab,el)=>{
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active')
+  document.getElementById('chatList').style.display=tab==='chats'?'block':'none'
+  document.getElementById('channelList').style.display=tab==='channels'?'block':'none'
+}
+
+// ── MODAL ──────────────────────────────────────────────────────
+window.openModal=id=>document.getElementById(id).classList.add('open')
+window.closeModal=id=>document.getElementById(id).classList.remove('open')
+
+// ── LIGHTBOX ───────────────────────────────────────────────────
+window.openLb=url=>{document.getElementById('lbImg').src=url;document.getElementById('lightbox').classList.add('open')}
+
+// ── PROFILES REALTIME ──────────────────────────────────────────
+function subscribeProfiles(){
+  sb.channel('prof-watch').on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},p=>{
+    // Banned check
+    if(p.new.id===ME.id&&p.new.banned){
+      document.getElementById('app').style.display='none'
+      document.getElementById('bannedScreen').classList.add('show')
+      document.getElementById('bannedReason').textContent='Alasan: '+(p.new.banned_reason||'Pelanggaran S&K')
+      return
+    }
+    if(chats.some(c=>c.user_a===p.new.id||c.user_b===p.new.id))loadChats()
+    if(activeChat?.other?.id===p.new.id){
+      activeChat.other={...activeChat.other,...p.new}
+      document.getElementById('chHeaderName').innerHTML=esc(getName(p.new.id,p.new.display_name)||p.new.username)+verifyBadge(p.new)
+      if(p.new.avatar_url){const ha=document.getElementById('chHeaderAvatar');ha.innerHTML=`<img src="${p.new.avatar_url}">`}
+    }
+  }).subscribe()
+}
+
+// ── GLOBAL REALTIME ────────────────────────────────────────────
+function subscribeGlobal(){
+  sb.channel('chats-g').on('postgres_changes',{event:'INSERT',schema:'public',table:'chats'},()=>loadChats())
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'chats'},()=>loadChats()).subscribe()
+
+  sb.channel('msgs-g').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},async p=>{
+    const m=p.new
+    if(m.sender_id===ME.id)return
+    const myChat=chats.find(c=>c.id===m.chat_id)
+    if(!myChat){await loadChats();return}
+    const other=getOther(myChat)
+    const sname=getName(other?.id,other?.display_name)||other?.username||'Pengguna'
+    const prev=m.deleted?'🚫 Pesan dihapus':m.file_type==='image'?'🖼️ Foto':m.file_type==='video'?'🎬 Video':m.file_type==='audio'?'🎵 Audio':m.file_type?`📄 ${m.file_name||'File'}`:m.content||'Pesan baru'
+    if(activeChat?.chat_id!==m.chat_id){
+      unreadCounts[m.chat_id]=(unreadCounts[m.chat_id]||0)+1
+      updateTabTitle()
+      showNotif(sname,other?.avatar_url||sname[0].toUpperCase(),prev,{chatId:m.chat_id,other})
+      sendBrowserNotif(sname,prev,other?.avatar_url)
+    }
+    loadChats()
+  }).subscribe()
+
+  sb.channel('mail-g').on('postgres_changes',{event:'INSERT',schema:'public',table:'mailbox',filter:`user_id=eq.${ME.id}`},p=>{
+    loadMailbox()
+    showNotif('NexWA','📬',p.new.title||'Pesan baru di Kotak Masuk',null)
+    sendBrowserNotif('NexWA — Kotak Masuk',p.new.title||'Pesan baru')
+  }).subscribe()
+}
+
+// ── NOTIFICATIONS ──────────────────────────────────────────────
+function initNotifSound(){
+  try{
+    const A=window.AudioContext||window.webkitAudioContext
+    if(A){const ctx=new A();notifSound=()=>{try{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.1);g.gain.setValueAtTime(.25,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3);o.start(ctx.currentTime);o.stop(ctx.currentTime+.3)}catch(e){}}}
+  }catch(e){}
+}
+
+function showNotifBanner(){
+  if('Notification'in window&&Notification.permission==='default'&&!localStorage.getItem('nw_notif_ok')){
+    setTimeout(()=>document.getElementById('notifBanner').style.display='flex',3000)
+  }
+}
+
+window.reqNotif=async()=>{
+  dismissNotif()
+  const p=await Notification.requestPermission()
+  if(p==='granted'){localStorage.setItem('nw_notif_ok','1');showNotif('NexWA','💬','Notifikasi berhasil diaktifkan!',null)}
+}
+window.dismissNotif=()=>{document.getElementById('notifBanner').style.display='none';localStorage.setItem('nw_notif_ok','1')}
+
+function showNotif(name,avatar,msg,chatData){
+  const c=document.getElementById('notifContainer')
+  const card=document.createElement('div');card.className='notif-card'
+  const avHTML=typeof avatar==='string'&&avatar.startsWith('http')?`<img src="${avatar}">`:`<span>${avatar}</span>`
+  const now=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})
+  card.innerHTML=`<div class="notif-avatar">${avHTML}</div>
+    <div class="notif-body"><div class="notif-app">NexWA</div><div class="notif-name">${esc(name)}</div><div class="notif-msg">${esc(msg)}</div></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span style="font-size:10px;color:var(--text-muted)">${now}</span><button class="notif-close-btn" onclick="this.closest('.notif-card').remove()">✕</button></div>`
+  card.onclick=e=>{if(e.target.classList.contains('notif-close-btn'))return;if(chatData)openChat(chatData.chatId,chatData.other);card.remove()}
+  c.appendChild(card);if(notifSound)notifSound()
+  setTimeout(()=>{card.classList.add('hide');setTimeout(()=>card.remove(),250)},5000)
+}
+
+function sendBrowserNotif(title,body,icon){
+  if(Notification.permission!=='granted')return
+  if(document.visibilityState==='visible')return
+  try{const n=new Notification(title,{body,icon:icon||'',tag:'nexwa',renotify:true});n.onclick=()=>{window.focus();n.close()};setTimeout(()=>n.close(),5000)}catch(e){}
+}
+
+function updateTabTitle(){
+  const total=Object.values(unreadCounts).reduce((a,b)=>a+b,0)
+  document.title=total>0?`(${total}) NexWA`:'NexWA'
+  const link=document.querySelector("link[rel*='icon']")||document.createElement('link')
+  link.rel='icon';link.type='image/svg+xml'
+  link.href=total>0?`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111b21'/><text y='.9em' font-size='80'>💬</text><circle cx='80' cy='20' r='18' fill='%23f15c6d'/></svg>`
+    :`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111b21'/><text y='.9em' font-size='80'>💬</text></svg>`
+  document.head.appendChild(link)
+}
+
+init()
+</script>
+</body>
+</html>
