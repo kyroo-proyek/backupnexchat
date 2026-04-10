@@ -939,7 +939,7 @@ window.handleAuth=async()=>{
   if(!rawPhone||!pass){err.textContent='Nomor telepon & password wajib diisi';return}
   if(pass.length<6){err.textContent='Password minimal 6 karakter';return}
   const phone=code+rawPhone
-  const email=phone.replace('+','')+'@nexlink.app'
+const email = `user${Date.now()}@temp.nexlink.app`
   const isL=document.getElementById('tabLogin').classList.contains('active')
   btn.disabled=true; btn.textContent='⏳ Memproses...'
   try{
