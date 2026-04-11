@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexLink — Developer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f7ff; --surface:#ffffff; --surface2:#e8f4fd; --surface3:#d4ebf8;
+  --border:#c2dff0; --border2:#a8d0e8;
+  --accent:#0ea5e9; --accent2:#10b981; --accent3:#06b6d4;
+  --text:#0f172a; --text2:#334155; --text-muted:#64748b; --text-light:#94a3b8;
+  --danger:#ef4444; --warning:#f59e0b; --success:#10b981; --info:#0ea5e9;
+  --verify-green:#10b981; --verify-blue:#0ea5e9; --verify-gold:#f59e0b;
+  --shadow:0 2px 12px rgba(14,165,233,.10);
+  --shadow-lg:0 8px 32px rgba(14,165,233,.15);
+  --r:12px;
+}
+[data-theme=dark] {
+  --bg:#0a1628; --surface:#0f2040; --surface2:#162a4a; --surface3:#1e3a5f;
+  --border:#1e3a5f; --border2:#2a4a6f;
+  --text:#e2f0ff; --text2:#a8c8e8; --text-muted:#6888a8; --text-light:#4a6888;
+  --shadow:0 2px 12px rgba(14,165,233,.18);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; display:flex; flex-direction:column; transition:background .3s,color .3s; }
+::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+
+/* ── LOGIN ── */
+.login-overlay { position:fixed; inset:0; background:linear-gradient(135deg,#e0f2fe 0%,#f0fdf4 100%); display:flex; align-items:center; justify-content:center; z-index:999; padding:20px; }
+[data-theme=dark] .login-overlay { background:linear-gradient(135deg,#0a1628,#0f2040); }
+.login-card { background:var(--surface); border-radius:20px; padding:32px; width:380px; border:1px solid var(--border); box-shadow:var(--shadow-lg); display:flex; flex-direction:column; gap:14px; }
+.login-brand { display:flex; align-items:center; justify-content:center; gap:9px; margin-bottom:4px; }
+.login-brand-text { font-size:22px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.login-title { font-size:18px; font-weight:700; text-align:center; }
+.login-warn { padding:8px 14px; border-radius:8px; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); color:var(--danger); font-size:12px; font-weight:600; text-align:center; }
+.login-input { padding:11px 14px; border-radius:var(--r); background:var(--surface2); border:1.5px solid var(--border); color:var(--text); font-family:inherit; font-size:14px; outline:none; transition:.2s; }
+.login-input:focus { border-color:var(--accent); }
+.login-err { color:var(--danger); font-size:12px; text-align:center; min-height:16px; }
+.login-btn { padding:12px; border-radius:var(--r); background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; transition:.2s; box-shadow:0 4px 16px rgba(14,165,233,.3); }
+.login-btn:hover { transform:translateY(-1px); }
+
+/* ── TOPBAR ── */
+.topbar { display:flex; align-items:center; gap:14px; padding:11px 22px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; box-shadow:var(--shadow); }
+.brand { display:flex; align-items:center; gap:8px; }
+.brand-text { font-size:17px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.dev-chip { padding:4px 11px; border-radius:20px; background:rgba(14,165,233,.12); border:1px solid rgba(14,165,233,.3); font-size:11px; color:var(--accent); font-weight:700; }
+.tb-spacer { flex:1; }
+.cs-alert { display:none; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25); color:var(--danger); font-size:12px; font-weight:700; cursor:pointer; }
+.cs-alert.show { display:inline-flex; animation:pulse-border 1.5s infinite; }
+@keyframes pulse-border { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3)} 50%{box-shadow:0 0 0 4px rgba(239,68,68,0)} }
+.icon-btn { width:34px; height:34px; border-radius:9px; background:transparent; border:none; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.15s; font-size:17px; }
+.icon-btn:hover { background:var(--surface2); color:var(--accent); }
+.logout-btn { padding:7px 14px; border-radius:9px; background:var(--surface2); border:1px solid var(--border); color:var(--text-muted); font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:.2s; }
+.logout-btn:hover { border-color:var(--danger); color:var(--danger); }
+
+/* ── LAYOUT ── */
+.layout { display:flex; flex:1; overflow:hidden; }
+
+/* ── SIDEBAR NAV ── */
+.sidebar { width:210px; background:var(--surface); border-right:1px solid var(--border); padding:12px 0; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; }
+.nav-section-label { padding:10px 18px 5px; font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:.8px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:10px 18px; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-muted); transition:.15s; border-left:3px solid transparent; position:relative; }
+.nav-item:hover { background:var(--surface2); color:var(--text); }
+.nav-item.active { background:linear-gradient(135deg,rgba(14,165,233,.08),rgba(16,185,129,.08)); color:var(--accent); border-left-color:var(--accent); font-weight:600; }
+.nav-badge { position:absolute; right:14px; background:var(--danger); color:#fff; border-radius:20px; padding:1px 7px; font-size:10px; font-weight:700; display:none; }
+.nav-badge.show { display:inline-block; }
+
+/* ── MAIN CONTENT ── */
+.main-content { flex:1; overflow-y:auto; padding:22px; }
+
+/* ── STATS GRID ── */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:22px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; display:flex; gap:12px; align-items:center; box-shadow:var(--shadow); transition:.2s; }
+.stat-card:hover { border-color:var(--accent); transform:translateY(-1px); }
+.stat-icon { font-size:28px; flex-shrink:0; }
+.stat-val { font-size:24px; font-weight:800; color:var(--accent); line-height:1; }
+.stat-lbl { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+
+/* ── SECTION ── */
+.section { background:var(--surface); border:1px solid var(--border); border-radius:14px; margin-bottom:18px; overflow:hidden; box-shadow:var(--shadow); }
+.section-hdr { padding:13px 18px; background:linear-gradient(135deg,rgba(14,165,233,.05),rgba(16,185,129,.05)); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.section-title { font-size:14px; font-weight:700; }
+.section-body { padding:16px; }
+
+/* ── TABLE ── */
+.data-table { width:100%; border-collapse:collapse; }
+.data-table th { padding:9px 13px; text-align:left; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); white-space:nowrap; }
+.data-table td { padding:11px 13px; font-size:13px; border-bottom:1px solid rgba(0,0,0,.04); vertical-align:middle; }
+[data-theme=dark] .data-table td { border-bottom-color:rgba(255,255,255,.04); }
+.data-table tr:last-child td { border-bottom:none; }
+.data-table tr:hover td { background:var(--surface2); }
+
+/* ── BADGES ── */
+.chip { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; }
+.chip-ok { background:rgba(16,185,129,.12); color:var(--success); }
+.chip-ban { background:rgba(239,68,68,.12); color:var(--danger); }
+.chip-flag { background:rgba(239,68,68,.08); color:var(--danger); border:1px solid rgba(239,68,68,.2); }
+.chip-pend { background:rgba(245,158,11,.12); color:var(--warning); }
+.chip-info { background:rgba(14,165,233,.12); color:var(--info); }
+.chip-res { background:rgba(16,185,129,.08); color:var(--success); border:1px solid rgba(16,185,129,.2); }
+
+/* ── VERIFY BADGES ── */
+.vb { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; flex-shrink:0; }
+.vb.g { background:var(--verify-green); } .vb.b { background:var(--verify-blue); } .vb.go { background:var(--verify-gold); }
+.vb svg { width:9px; height:9px; }
+
+/* ── TOGGLE CONTROLS ── */
+.ctrl-wrap { display:flex; flex-wrap:wrap; gap:5px; }
+.vck { display:inline-flex; align-items:center; gap:3px; padding:4px 9px; border-radius:20px; border:1.5px solid; cursor:pointer; font-size:11px; font-weight:600; transition:.15s; user-select:none; font-family:inherit; }
+.vck.g  { border-color:rgba(16,185,129,.4); color:var(--verify-green); }
+.vck.g.on { background:rgba(16,185,129,.15); }
+.vck.bl { border-color:rgba(14,165,233,.4); color:var(--verify-blue); }
+.vck.bl.on { background:rgba(14,165,233,.15); }
+.vck.go { border-color:rgba(245,158,11,.4); color:var(--verify-gold); }
+.vck.go.on { background:rgba(245,158,11,.15); }
+.bnck { display:inline-flex; align-items:center; padding:4px 9px; border-radius:20px; border:1.5px solid; cursor:pointer; font-size:11px; font-weight:600; transition:.15s; user-select:none; font-family:inherit; }
+.bnck.bn-bl { border-color:rgba(14,165,233,.4); color:var(--info); }
+.bnck.bn-bl.on { background:rgba(14,165,233,.15); }
+.bnck.bn-go { border-color:rgba(245,158,11,.4); color:var(--verify-gold); }
+.bnck.bn-go.on { background:rgba(245,158,11,.15); }
+
+/* ── ACTION BUTTONS ── */
+.act-btn { padding:5px 11px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:1.5px solid; transition:.15s; font-family:inherit; white-space:nowrap; }
+.act-ban { background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.3); color:var(--danger); }
+.act-ban:hover { background:var(--danger); color:#fff; }
+.act-unban { background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.3); color:var(--success); }
+.act-unban:hover { background:var(--success); color:#fff; }
+.act-ok { background:rgba(14,165,233,.08); border-color:rgba(14,165,233,.3); color:var(--info); }
+.act-ok:hover { background:var(--info); color:#fff; }
+.act-flag { background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.3); color:var(--danger); }
+.act-flag:hover { background:var(--danger); color:#fff; }
+.act-unflag { background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.3); color:var(--success); }
+.act-unflag:hover { background:var(--success); color:#fff; }
+
+/* ── FORM ── */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.fg { display:flex; flex-direction:column; gap:5px; }
+.fg.full { grid-column:1/-1; }
+.fg label { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; }
+.form-input { padding:10px 13px; border-radius:10px; background:var(--surface2); border:1.5px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; outline:none; transition:.2s; }
+.form-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(14,165,233,.1); }
+.form-textarea { padding:10px 13px; border-radius:10px; background:var(--surface2); border:1.5px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; outline:none; resize:vertical; min-height:80px; transition:.2s; }
+.form-textarea:focus { border-color:var(--accent); }
+.form-select { padding:10px 13px; border-radius:10px; background:var(--surface2); border:1.5px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; outline:none; transition:.2s; }
+.submit-btn { padding:11px 20px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:.2s; box-shadow:0 4px 12px rgba(14,165,233,.25); }
+.submit-btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 18px rgba(14,165,233,.35); }
+.submit-btn:disabled { opacity:.5; cursor:not-allowed; }
+.success-msg { color:var(--success); font-size:12px; font-weight:600; display:none; margin-top:8px; }
+.success-msg.show { display:block; }
+.warn-box { padding:10px 14px; background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.2); border-radius:10px; font-size:13px; color:var(--warning); margin-bottom:12px; }
+.appeal-msg-box { background:var(--surface2); border-radius:8px; padding:10px 13px; font-size:13px; color:var(--text); line-height:1.6; max-width:300px; white-space:pre-wrap; }
+
+/* ── CS LAYOUT ── */
+.cs-layout { display:flex; gap:14px; height:calc(100vh - 150px); }
+.cs-ticket-panel { width:260px; flex-shrink:0; background:var(--surface); border:1px solid var(--border); border-radius:14px; display:flex; flex-direction:column; overflow:hidden; }
+.cs-chat-panel { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:14px; display:flex; flex-direction:column; overflow:hidden; }
+.cs-panel-hdr { padding:12px 16px; background:linear-gradient(135deg,rgba(14,165,233,.07),rgba(16,185,129,.07)); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.cs-panel-title { font-size:13px; font-weight:700; }
+.cs-ticket-list { flex:1; overflow-y:auto; }
+.cs-ticket-item { padding:12px 14px; cursor:pointer; border-bottom:1px solid var(--border); transition:.15s; position:relative; }
+.cs-ticket-item:hover { background:var(--surface2); }
+.cs-ticket-item.active { background:rgba(14,165,233,.08); border-left:3px solid var(--accent); }
+.cs-ticket-name { font-size:13px; font-weight:600; display:flex; align-items:center; gap:5px; }
+.cs-ticket-cat { font-size:11px; color:var(--text-muted); margin-top:2px; }
+.cs-ticket-time { font-size:10px; color:var(--text-muted); }
+.cs-new-dot { display:inline-block; width:7px; height:7px; background:var(--danger); border-radius:50%; }
+.cs-empty-state { flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:13px; flex-direction:column; gap:8px; }
+.cs-chat-hdr { padding:12px 16px; background:linear-gradient(135deg,rgba(14,165,233,.07),rgba(16,185,129,.07)); border-bottom:1px solid var(--border); flex-shrink:0; }
+.cs-chat-user { font-size:14px; font-weight:700; }
+.cs-chat-cat { font-size:12px; color:var(--text-muted); margin-top:2px; }
+.cs-messages { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:8px; }
+.cs-msg { padding:9px 13px; border-radius:12px; font-size:13px; line-height:1.5; max-width:78%; word-break:break-word; }
+.cs-msg.user { background:var(--surface2); border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:3px; color:var(--text); }
+.cs-msg.dev { background:linear-gradient(135deg,var(--accent),#0284c7); color:#fff; align-self:flex-end; border-bottom-right-radius:3px; }
+.cs-msg-time { font-size:10px; opacity:.65; margin-top:2px; }
+.cs-input-row { padding:10px 12px; border-top:1px solid var(--border); display:flex; gap:8px; align-items:flex-end; flex-shrink:0; }
+.cs-dev-input { flex:1; background:var(--surface2); border:1.5px solid var(--border); border-radius:10px; padding:9px 13px; color:var(--text); font-family:inherit; font-size:13px; outline:none; resize:none; max-height:80px; min-height:38px; transition:.2s; }
+.cs-dev-input:focus { border-color:var(--accent); }
+.cs-send-btn { padding:9px 18px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; color:#fff; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+
+/* ── SEARCH INPUT ── */
+.search-input { padding:7px 11px; border-radius:9px; background:var(--surface2); border:1.5px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; outline:none; transition:.2s; }
+.search-input:focus { border-color:var(--accent); }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:20px; right:20px; background:var(--surface); border:1px solid var(--border); padding:10px 18px; border-radius:12px; font-size:13px; font-weight:600; z-index:200; opacity:0; pointer-events:none; transition:.3s; box-shadow:var(--shadow-lg); }
+.toast.show { opacity:1; }
+
+/* Flag name style */
+.text-flag { color:var(--danger) !important; font-weight:700 !important; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <rect width="40" height="40" rx="10" fill="url(#lg1)"/>
+        <defs><linearGradient id="lg1" x1="0" y1="0" x2="40" y2="40"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#10b981"/></linearGradient></defs>
+        <rect x="5" y="7" width="18" height="5" rx="2" fill="white" opacity=".9"/>
+        <circle cx="21" cy="9.5" r="1.5" fill="#10b981"/>
+        <rect x="5" y="15" width="18" height="5" rx="2" fill="white" opacity=".75"/>
+        <rect x="5" y="23" width="18" height="5" rx="2" fill="white" opacity=".6"/>
+        <rect x="21" y="15" width="14" height="13" rx="5" fill="white" opacity=".95"/>
+        <circle cx="25" cy="21.5" r="1.2" fill="#0ea5e9"/><circle cx="28" cy="21.5" r="1.2" fill="#10b981"/><circle cx="31" cy="21.5" r="1.2" fill="#06b6d4"/>
+        <path d="M21 28l2.5 3.5 1.5-3.5z" fill="white" opacity=".95"/>
+      </svg>
+      <span class="login-brand-text">NexLink Dev</span>
+    </div>
+    <div class="login-title">🔐 Developer Login</div>
+    <div class="login-warn">⚠️ Akses Khusus Developer / Admin</div>
+    <input class="login-input" id="devEmail" type="email" placeholder="Email developer">
+    <input class="login-input" id="devPass" type="password" placeholder="Password">
+    <div class="login-err" id="loginErr"></div>
+    <button class="login-btn" onclick="devLogin()">Masuk sebagai Developer</button>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+      <rect width="40" height="40" rx="10" fill="url(#lg2)"/>
+      <defs><linearGradient id="lg2" x1="0" y1="0" x2="40" y2="40"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#10b981"/></linearGradient></defs>
+      <rect x="5" y="7" width="18" height="5" rx="2" fill="white" opacity=".9"/>
+      <circle cx="21" cy="9.5" r="1.5" fill="#10b981"/>
+      <rect x="5" y="15" width="18" height="5" rx="2" fill="white" opacity=".75"/>
+      <rect x="5" y="23" width="18" height="5" rx="2" fill="white" opacity=".6"/>
+      <rect x="21" y="15" width="14" height="13" rx="5" fill="white" opacity=".95"/>
+      <circle cx="25" cy="21.5" r="1.2" fill="#0ea5e9"/><circle cx="28" cy="21.5" r="1.2" fill="#10b981"/><circle cx="31" cy="21.5" r="1.2" fill="#06b6d4"/>
+      <path d="M21 28l2.5 3.5 1.5-3.5z" fill="white" opacity=".95"/>
+    </svg>
+    <span class="brand-text">NexLink</span>
+  </div>
+  <div class="dev-chip">👨‍💻 DEVELOPER</div>
+  <div class="tb-spacer"></div>
+  <div class="cs-alert" id="csAlert" onclick="showPage('cs',document.querySelector('[data-page=cs]'))">🆕 Tiket CS Baru</div>
+  <button class="icon-btn" onclick="toggleTheme()" title="Toggle tema">🌙</button>
+  <button class="logout-btn" onclick="devLogout()">Keluar</button>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-section-label">Utama</div>
+    <div class="nav-item active" data-page="dash" onclick="showPage('dash',this)">📊 Dashboard</div>
+    <div class="nav-item" data-page="users" onclick="showPage('users',this)">👥 Pengguna</div>
+
+    <div class="nav-section-label">Moderasi</div>
+    <div class="nav-item" data-page="verify" onclick="showPage('verify',this)">✅ Verifikasi</div>
+    <div class="nav-item" data-page="flag" onclick="showPage('flag',this)">
+      ⚠️ Tandai Akun
+      <span class="nav-badge" id="nb-flag"></span>
+    </div>
+    <div class="nav-item" data-page="reports" onclick="showPage('reports',this)">
+      🚨 Laporan
+      <span class="nav-badge" id="nb-reports"></span>
+    </div>
+    <div class="nav-item" data-page="appeals" onclick="showPage('appeals',this)">
+      📝 Banding
+      <span class="nav-badge" id="nb-appeals"></span>
+    </div>
+
+    <div class="nav-section-label">Komunikasi</div>
+    <div class="nav-item" data-page="cs" onclick="showPage('cs',this)">
+      💬 Customer Service
+      <span class="nav-badge" id="nb-cs"></span>
+    </div>
+    <div class="nav-item" data-page="mailbox" onclick="showPage('mailbox',this)">📬 Kirim Mailbox</div>
+    <div class="nav-item" data-page="broadcast" onclick="showPage('broadcast',this)">📢 Broadcast</div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="pageDash">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div><div class="stat-val" id="stUsers">0</div><div class="stat-lbl">Total User</div></div></div>
+        <div class="stat-card"><div class="stat-icon">🚫</div><div><div class="stat-val" id="stBanned">0</div><div class="stat-lbl">Dibanned</div></div></div>
+        <div class="stat-card"><div class="stat-icon">⚠️</div><div><div class="stat-val" id="stFlagged">0</div><div class="stat-lbl">Ditandai</div></div></div>
+        <div class="stat-card"><div class="stat-icon">🚨</div><div><div class="stat-val" id="stReports">0</div><div class="stat-lbl">Laporan Pending</div></div></div>
+        <div class="stat-card"><div class="stat-icon">📝</div><div><div class="stat-val" id="stAppeals">0</div><div class="stat-lbl">Banding Pending</div></div></div>
+        <div class="stat-card"><div class="stat-icon">💬</div><div><div class="stat-val" id="stCS">0</div><div class="stat-lbl">Tiket CS Open</div></div></div>
+      </div>
+      <div class="section">
+        <div class="section-hdr"><div class="section-title">📝 Banding Terbaru</div><button class="act-btn act-ok" onclick="showPage('appeals',document.querySelector('[data-page=appeals]'))">Lihat Semua</button></div>
+        <div class="section-body" id="dashAppeals"><div style="color:var(--text-muted);font-size:13px">Memuat...</div></div>
+      </div>
+      <div class="section">
+        <div class="section-hdr"><div class="section-title">🚨 Laporan Terbaru</div><button class="act-btn act-ok" onclick="showPage('reports',document.querySelector('[data-page=reports]'))">Lihat Semua</button></div>
+        <div class="section-body" id="dashReports"><div style="color:var(--text-muted);font-size:13px">Memuat...</div></div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div id="pageUsers" style="display:none">
+      <div class="section">
+        <div class="section-hdr">
+          <div class="section-title">👥 Semua Pengguna</div>
+          <input class="search-input" id="userSearch" placeholder="Cari nama / username / HP..." oninput="filterUsers()">
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Nama</th><th>Username</th><th>Nomor HP</th><th>Verifikasi</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="userTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VERIFY ══ -->
+    <div id="pageVerify" style="display:none">
+      <div class="section">
+        <div class="section-hdr">
+          <div class="section-title">✅ Kelola Verifikasi & Banner</div>
+          <div style="font-size:12px;color:var(--text-muted)">Klik toggle untuk aktifkan/nonaktifkan</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Nama</th><th>Username</th><th>HP</th><th>Centang Verifikasi</th><th>Banner Nama</th></tr></thead>
+            <tbody id="verifyTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FLAG ══ -->
+    <div id="pageFlag" style="display:none">
+      <div class="section">
+        <div class="section-hdr"><div class="section-title">⚠️ Tandai Akun Berbahaya</div></div>
+        <div class="section-body" style="padding:12px 16px">
+          <div style="padding:10px 14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:10px;font-size:13px;color:var(--danger);margin-bottom:14px">
+            ⚠️ Akun yang ditandai akan menampilkan <strong>nama & nomor HP berwarna merah</strong> dan <strong>banner peringatan</strong> kepada pengguna lain sebelum memulai percakapan.
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Nama</th><th>Username</th><th>Nomor HP</th><th>Alasan Tanda</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="flagTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div id="pageReports" style="display:none">
+      <div class="section">
+        <div class="section-hdr"><div class="section-title">🚨 Laporan Pengguna</div></div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Pelapor</th><th>Dilaporkan</th><th>Alasan</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="reportTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ APPEALS ══ -->
+    <div id="pageAppeals" style="display:none">
+      <div class="section">
+        <div class="section-hdr"><div class="section-title">📝 Pengajuan Banding</div></div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Pengguna</th><th>Nomor HP</th><th>Pesan Banding</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="appealTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CS ══ -->
+    <div id="pageCS" style="display:none">
+      <div class="cs-layout">
+        <!-- Ticket List -->
+        <div class="cs-ticket-panel">
+          <div class="cs-panel-hdr">
+            <div class="cs-panel-title">Tiket Masuk</div>
+            <span id="csTicketCount" style="font-size:11px;color:var(--text-muted)">0 tiket</span>
+          </div>
+          <div class="cs-ticket-list" id="csTicketList">
+            <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">Belum ada tiket</div>
+          </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="cs-chat-panel">
+          <div class="cs-empty-state" id="csEmptyState">
+            <span style="font-size:40px">💬</span>
+            <span>Pilih tiket untuk membalas</span>
+          </div>
+          <div id="csChatMain" style="display:none;flex-direction:column;height:100%">
+            <div class="cs-chat-hdr">
+              <div class="cs-chat-user" id="csChatUser">-</div>
+              <div class="cs-chat-cat" id="csChatCat">-</div>
+            </div>
+            <div class="cs-messages" id="csMsgsWrap"></div>
+            <div class="cs-input-row">
+              <textarea class="cs-dev-input" id="csDevInput" placeholder="Tulis balasan..." rows="1"></textarea>
+              <button class="cs-send-btn" onclick="sendCSReply()">Kirim ➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MAILBOX ══ -->
+    <div id="pageMailbox" style="display:none">
+      <div class="section">
+        <div class="section-hdr"><div class="section-title">📬 Kirim Mailbox ke Pengguna</div></div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="fg">
+              <label>Pilih Pengguna</label>
+              <select class="form-select" id="mailTarget"><option value="">-- Pilih pengguna --</option></select>
+            </div>
+            <div class="fg">
+              <label>Judul Pesan</label>
+              <input class="form-input" id="mailTitle" placeholder="Subjek pesan...">
+            </div>
+            <div class="fg full">
+              <label>Isi Pesan</label>
+              <textarea class="form-textarea" id="mailContent" placeholder="Tulis isi pesan..."></textarea>
+            </div>
+            <div class="fg full">
+              <label>Link (opsional)</label>
+              <input class="form-input" id="mailLink" placeholder="https://...">
+            </div>
+          </div>
+          <button class="submit-btn" onclick="sendMailbox()" style="margin-top:14px">📨 Kirim Mailbox</button>
+          <div class="success-msg" id="mailSuccess">✅ Mailbox berhasil terkirim!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BROADCAST ══ -->
+    <div id="pageBroadcast" style="display:none">
+      <div class="section">
+        <div class="section-hdr"><div class="section-title">📢 Broadcast ke Semua Pengguna</div></div>
+        <div class="section-body">
+          <div class="warn-box">⚠️ Pesan broadcast akan dikirim ke SEMUA pengguna yang terdaftar. Pastikan isi pesan sudah benar sebelum mengirim.</div>
+          <div class="form-grid">
+            <div class="fg full">
+              <label>Judul Broadcast</label>
+              <input class="form-input" id="bcTitle" placeholder="Judul pengumuman...">
+            </div>
+            <div class="fg full">
+              <label>Isi Pesan</label>
+              <textarea class="form-textarea" id="bcContent" placeholder="Isi pengumuman untuk semua pengguna..." style="min-height:100px"></textarea>
+            </div>
+            <div class="fg full">
+              <label>Link (opsional)</label>
+              <input class="form-input" id="bcLink" placeholder="https://...">
+            </div>
+          </div>
+          <button class="submit-btn" id="bcBtn" onclick="sendBroadcast()" style="margin-top:14px">📢 Kirim ke Semua Pengguna</button>
+          <div class="success-msg" id="bcSuccess">✅ Broadcast berhasil terkirim!</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+// ── GANTI INI ─────────────────────────────────────────────────
+const SUPABASE_URL = "https://bbbwmqbriqmobxekuzca.supabase.co"
+const SUPABASE_KEY = "sb_publishable_zh2AADu4LH6splk2HNp3EA_0s8xMUDP"
+// ─────────────────────────────────────────────────────────────
+
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+let devId = null
+let allUsers = []
+let usersMap = {}
+let activeTicket = null
+let activeTicketChannel = null
+
+// ── UTILS ─────────────────────────────────────────────────────
+const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+const fmtDate = ts => new Date(ts).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})
+const fmtTime = ts => new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})
+
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), dur)
+}
+function showOk(id) {
+  const el = document.getElementById(id)
+  el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3000)
+}
+function setBadge(id, count) {
+  const el = document.getElementById(id)
+  if (!el) return
+  el.textContent = count || 0
+  el.classList.toggle('show', (count || 0) > 0)
+}
+
+// ── THEME ─────────────────────────────────────────────────────
+function initTheme() {
+  const t = localStorage.getItem('nxl_dev_theme') || 'light'
+  document.documentElement.setAttribute('data-theme', t)
+}
+window.toggleTheme = () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'light'
+  const next = cur === 'dark' ? 'light' : 'dark'
+  document.documentElement.setAttribute('data-theme', next)
+  localStorage.setItem('nxl_dev_theme', next)
+}
+
+// ── VERIFY BADGE HTML ─────────────────────────────────────────
+function vBadgeHtml(u) {
+  let h = ''
+  if (u?.verified_green) h += `<span class="vb g"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>`
+  if (u?.verified_blue)  h += `<span class="vb b"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>`
+  if (u?.verified_gold)  h += `<span class="vb go"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>`
+  return h
+}
+
+// ── AUTH ──────────────────────────────────────────────────────
+async function init() {
+  initTheme()
+  const { data: { session } } = await sb.auth.getSession()
+  if (session) {
+    const { data: p } = await sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle()
+    if (p?.role === 'developer') {
+      devId = session.user.id
+      document.getElementById('loginOverlay').style.display = 'none'
+      startApp()
+    } else {
+      await sb.auth.signOut()
+    }
+  }
+}
+
+window.devLogin = async () => {
+  const email = document.getElementById('devEmail').value.trim()
+  const pass  = document.getElementById('devPass').value
+  const err   = document.getElementById('loginErr')
+  err.textContent = ''
+  if (!email || !pass) { err.textContent = 'Isi semua field'; return }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass })
+  if (error) { err.textContent = error.message; return }
+  const { data: p } = await sb.from('profiles').select('role').eq('id', data.user.id).maybeSingle()
+  if (!p || p.role !== 'developer') {
+    err.textContent = 'Akun ini bukan Developer. Akses ditolak.'
+    await sb.auth.signOut(); return
+  }
+  devId = data.user.id
+  document.getElementById('loginOverlay').style.display = 'none'
+  startApp()
+}
+
+window.devLogout = async () => { await sb.auth.signOut(); location.reload() }
+
+// ── START APP ─────────────────────────────────────────────────
+async function startApp() {
+  await Promise.all([loadStats(), loadUsers()])
+  loadDashboard()
+  subscribeCSRealtime()
+}
+
+// ── STATS ─────────────────────────────────────────────────────
+async function loadStats() {
+  const [users, banned, flagged, reports, appeals, cs] = await Promise.all([
+    sb.from('profiles').select('*', {count:'exact', head:true}).neq('role','developer'),
+    sb.from('profiles').select('*', {count:'exact', head:true}).eq('banned', true),
+    sb.from('profiles').select('*', {count:'exact', head:true}).eq('flagged', true),
+    sb.from('reports').select('*', {count:'exact', head:true}).eq('status','pending'),
+    sb.from('appeals').select('*', {count:'exact', head:true}).eq('status','pending'),
+    sb.from('cs_tickets').select('*', {count:'exact', head:true}).eq('status','open')
+  ])
+  document.getElementById('stUsers').textContent   = users.count   || 0
+  document.getElementById('stBanned').textContent  = banned.count  || 0
+  document.getElementById('stFlagged').textContent = flagged.count || 0
+  document.getElementById('stReports').textContent = reports.count || 0
+  document.getElementById('stAppeals').textContent = appeals.count || 0
+  document.getElementById('stCS').textContent      = cs.count      || 0
+  setBadge('nb-flag',    flagged.count)
+  setBadge('nb-reports', reports.count)
+  setBadge('nb-appeals', appeals.count)
+  setBadge('nb-cs',      cs.count)
+}
+
+// ── LOAD USERS ────────────────────────────────────────────────
+async function loadUsers() {
+  const { data } = await sb.from('profiles').select('*').neq('role','developer').order('created_at', {ascending:false})
+  allUsers = data || []
+  usersMap = {}
+  allUsers.forEach(u => usersMap[u.id] = u)
+  renderUserTable(allUsers)
+  renderVerifyTable(allUsers)
+  renderFlagTable(allUsers)
+  // Populate mailbox target
+  const sel = document.getElementById('mailTarget')
+  sel.innerHTML = '<option value="">-- Pilih pengguna --</option>'
+  allUsers.forEach(u => {
+    const opt = document.createElement('option')
+    opt.value = u.id
+    opt.textContent = `${u.display_name || '?'} (${u.phone || u.username || u.id.substring(0,8)})`
+    sel.appendChild(opt)
+  })
+}
+
+// ── RENDER USER TABLE ─────────────────────────────────────────
+function renderUserTable(users) {
+  const tbody = document.getElementById('userTbody')
+  tbody.innerHTML = ''
+  users.forEach(u => {
+    const tr = document.createElement('tr')
+    const isFlagged = u.flagged
+    tr.innerHTML = `
+      <td><span class="${isFlagged ? 'text-flag' : ''}" style="display:flex;align-items:center;gap:4px">${esc(u.display_name || '-')}${isFlagged ? '<span style="font-size:11px">⚠️</span>' : ''}</span></td>
+      <td>${esc(u.username ? '@'+u.username : '-')}</td>
+      <td><span class="${isFlagged ? 'text-flag' : ''}">${esc(u.phone || '-')}</span></td>
+      <td style="display:flex;align-items:center;gap:3px">${vBadgeHtml(u) || '<span style="color:var(--text-light);font-size:11px">-</span>'}</td>
+      <td><span class="chip ${u.banned ? 'chip-ban' : isFlagged ? 'chip-flag' : 'chip-ok'}">${u.banned ? '🚫 Banned' : isFlagged ? '⚠️ Ditandai' : '✓ Aktif'}</span></td>
+      <td style="display:flex;gap:6px;align-items:center">
+        ${u.banned
+          ? `<button class="act-btn act-unban" onclick="unbanUser('${u.id}')">✅ Unban</button>`
+          : `<button class="act-btn act-ban" onclick="banUser('${u.id}')">🚫 Ban</button>`
+        }
+      </td>`
+    tbody.appendChild(tr)
+  })
+}
+
+window.filterUsers = () => {
+  const q = document.getElementById('userSearch').value.toLowerCase()
+  renderUserTable(allUsers.filter(u =>
+    (u.display_name||'').toLowerCase().includes(q) ||
+    (u.username||'').toLowerCase().includes(q) ||
+    (u.phone||'').includes(q)
+  ))
+}
+
+window.banUser = async id => {
+  const reason = prompt('Alasan ban (wajib diisi):')
+  if (!reason) return
+  await sb.from('profiles').update({ banned: true, banned_reason: reason }).eq('id', id)
+  toast('🚫 User berhasil dibanned')
+  await loadStats(); await loadUsers()
+}
+
+window.unbanUser = async id => {
+  await sb.from('profiles').update({ banned: false, banned_reason: null }).eq('id', id)
+  toast('✅ User berhasil di-unban')
+  await loadStats(); await loadUsers()
+}
+
+// ── RENDER VERIFY TABLE ───────────────────────────────────────
+function renderVerifyTable(users) {
+  const tbody = document.getElementById('verifyTbody')
+  tbody.innerHTML = ''
+  users.forEach(u => {
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td style="display:flex;align-items:center;gap:4px">${esc(u.display_name || '-')}${vBadgeHtml(u)}</td>
+      <td>${esc(u.username ? '@'+u.username : '-')}</td>
+      <td>${esc(u.phone || '-')}</td>
+      <td>
+        <div class="ctrl-wrap">
+          <div class="vck g${u.verified_green ? ' on' : ''}" onclick="toggleVerify('${u.id}','verified_green',${!u.verified_green},this)">✓ Hijau</div>
+          <div class="vck bl${u.verified_blue ? ' on' : ''}" onclick="toggleVerify('${u.id}','verified_blue',${!u.verified_blue},this)">✓ Biru</div>
+          <div class="vck go${u.verified_gold ? ' on' : ''}" onclick="toggleVerify('${u.id}','verified_gold',${!u.verified_gold},this)">★ Gold</div>
+        </div>
+      </td>
+      <td>
+        <div class="ctrl-wrap">
+          <div class="bnck bn-bl${u.banner_blue ? ' on' : ''}" onclick="toggleVerify('${u.id}','banner_blue',${!u.banner_blue},this)">◈ Banner Biru</div>
+          <div class="bnck bn-go${u.banner_gold ? ' on' : ''}" onclick="toggleVerify('${u.id}','banner_gold',${!u.banner_gold},this)">✦ Banner Gold</div>
+        </div>
+      </td>`
+    tbody.appendChild(tr)
+  })
+}
+
+window.toggleVerify = async (uid, field, val, el) => {
+  const { error } = await sb.from('profiles').update({ [field]: val }).eq('id', uid)
+  if (error) { toast('Gagal: ' + error.message); return }
+  if (usersMap[uid]) usersMap[uid][field] = val
+  allUsers = allUsers.map(u => u.id === uid ? {...u, [field]: val} : u)
+  el.classList.toggle('on', val)
+  toast(val ? `✅ ${field} diaktifkan` : `${field} dinonaktifkan`)
+}
+
+// ── RENDER FLAG TABLE ─────────────────────────────────────────
+function renderFlagTable(users) {
+  const tbody = document.getElementById('flagTbody')
+  tbody.innerHTML = ''
+  users.forEach(u => {
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td><span class="${u.flagged ? 'text-flag' : ''}">${esc(u.display_name || '-')}</span></td>
+      <td>${esc(u.username ? '@'+u.username : '-')}</td>
+      <td><span class="${u.flagged ? 'text-flag' : ''}">${esc(u.phone || '-')}</span></td>
+      <td>${u.flagged ? `<span style="color:var(--danger);font-size:12px;font-weight:600">${esc(u.flag_reason || '-')}</span>` : '<span style="color:var(--text-light);font-size:12px">-</span>'}</td>
+      <td><span class="chip ${u.flagged ? 'chip-flag' : 'chip-ok'}">${u.flagged ? '⚠️ Ditandai' : 'Normal'}</span></td>
+      <td style="display:flex;gap:6px">
+        ${u.flagged
+          ? `<button class="act-btn act-unflag" onclick="unflagUser('${u.id}')">✅ Hapus Tanda</button>`
+          : `<button class="act-btn act-flag" onclick="flagUser('${u.id}')">⚠️ Tandai Berbahaya</button>`
+        }
+      </td>`
+    tbody.appendChild(tr)
+  })
+}
+
+window.flagUser = async id => {
+  const reason = prompt('Alasan penandaan (contoh: Penipu, Scammer, Akun Palsu):')
+  if (!reason) return
+  await sb.from('profiles').update({ flagged: true, flag_reason: reason }).eq('id', id)
+  if (usersMap[id]) { usersMap[id].flagged = true; usersMap[id].flag_reason = reason }
+  allUsers = allUsers.map(u => u.id === id ? {...u, flagged: true, flag_reason: reason} : u)
+  renderFlagTable(allUsers); renderUserTable(allUsers)
+  await loadStats()
+  toast('⚠️ Akun berhasil ditandai sebagai berbahaya')
+}
+
+window.unflagUser = async id => {
+  await sb.from('profiles').update({ flagged: false, flag_reason: null }).eq('id', id)
+  if (usersMap[id]) { usersMap[id].flagged = false; usersMap[id].flag_reason = null }
+  allUsers = allUsers.map(u => u.id === id ? {...u, flagged: false, flag_reason: null} : u)
+  renderFlagTable(allUsers); renderUserTable(allUsers)
+  await loadStats()
+  toast('✅ Tanda berbahaya berhasil dihapus')
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────
+async function loadDashboard() {
+  // Recent appeals
+  const { data: ap } = await sb.from('appeals').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(5)
+  const apDiv = document.getElementById('dashAppeals')
+  if (!ap?.length) {
+    apDiv.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Tidak ada banding pending</div>'
+  } else {
+    apDiv.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Pengguna</th><th>HP</th><th>Pesan</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+        <tbody>${ap.map(a => `<tr>
+          <td>${esc(usersMap[a.user_id]?.display_name || '-')}</td>
+          <td>${esc(a.phone || '-')}</td>
+          <td><div class="appeal-msg-box">${esc(a.message)}</div></td>
+          <td>${fmtDate(a.created_at)}</td>
+          <td style="display:flex;gap:6px">
+            <button class="act-btn act-ok" onclick="acceptAppeal('${a.id}','${a.user_id}')">✅ Terima</button>
+            <button class="act-btn act-ban" onclick="rejectAppeal('${a.id}')">❌ Tolak</button>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>`
+  }
+
+  // Recent reports
+  const { data: rp } = await sb.from('reports').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(5)
+  const rpDiv = document.getElementById('dashReports')
+  if (!rp?.length) {
+    rpDiv.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Tidak ada laporan pending</div>'
+  } else {
+    rpDiv.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Pelapor</th><th>Dilaporkan</th><th>Alasan</th><th>Aksi</th></tr></thead>
+        <tbody>${rp.map(r => `<tr>
+          <td>${esc(usersMap[r.reporter_id]?.display_name || r.reporter_id?.substring(0,8))}</td>
+          <td>${esc(usersMap[r.reported_id]?.display_name || r.reported_id?.substring(0,8))}</td>
+          <td>${esc(r.reason)}</td>
+          <td style="display:flex;gap:6px">
+            <button class="act-btn act-ban" onclick="banFromReport('${r.id}','${r.reported_id}')">🚫 Ban</button>
+            <button class="act-btn act-flag" onclick="flagFromReport('${r.id}','${r.reported_id}')">⚠️ Tandai</button>
+            <button class="act-btn act-ok" onclick="dismissReport('${r.id}')">Abaikan</button>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>`
+  }
+}
+
+// ── REPORTS PAGE ──────────────────────────────────────────────
+async function loadReportsPage() {
+  const { data } = await sb.from('reports').select('*').order('created_at', {ascending:false})
+  const tbody = document.getElementById('reportTbody')
+  tbody.innerHTML = ''
+  ;(data || []).forEach(r => {
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td>${esc(usersMap[r.reporter_id]?.display_name || r.reporter_id?.substring(0,8))}</td>
+      <td>${esc(usersMap[r.reported_id]?.display_name || r.reported_id?.substring(0,8))}</td>
+      <td>${esc(r.reason)}</td>
+      <td>${fmtDate(r.created_at)}</td>
+      <td><span class="chip ${r.status==='pending'?'chip-pend':r.status==='resolved'?'chip-res':'chip-ok'}">${r.status}</span></td>
+      <td style="display:flex;gap:6px">${r.status==='pending' ? `
+        <button class="act-btn act-ban" onclick="banFromReport('${r.id}','${r.reported_id}')">🚫 Ban</button>
+        <button class="act-btn act-flag" onclick="flagFromReport('${r.id}','${r.reported_id}')">⚠️ Tandai</button>
+        <button class="act-btn act-ok" onclick="dismissReport('${r.id}')">Abaikan</button>
+      ` : '-'}</td>`
+    tbody.appendChild(tr)
+  })
+}
+
+window.banFromReport = async (reportId, uid) => {
+  const reason = prompt('Alasan ban:', 'Dilaporkan oleh pengguna')
+  if (!reason) return
+  await sb.from('reports').update({ status: 'resolved' }).eq('id', reportId)
+  await sb.from('profiles').update({ banned: true, banned_reason: reason }).eq('id', uid)
+  toast('🚫 User dibanned'); await loadStats(); await loadUsers(); loadDashboard()
+}
+
+window.flagFromReport = async (reportId, uid) => {
+  const reason = prompt('Alasan penandaan:', 'Dilaporkan oleh pengguna')
+  if (!reason) return
+  await sb.from('reports').update({ status: 'resolved' }).eq('id', reportId)
+  await sb.from('profiles').update({ flagged: true, flag_reason: reason }).eq('id', uid)
+  toast('⚠️ Akun ditandai berbahaya'); await loadStats(); await loadUsers(); loadDashboard()
+}
+
+window.dismissReport = async id => {
+  await sb.from('reports').update({ status: 'dismissed' }).eq('id', id)
+  toast('Laporan diabaikan'); loadDashboard(); loadReportsPage()
+}
+
+// ── APPEALS PAGE ──────────────────────────────────────────────
+async function loadAppealsPage() {
+  const { data } = await sb.from('appeals').select('*').order('created_at', {ascending:false})
+  const tbody = document.getElementById('appealTbody')
+  tbody.innerHTML = ''
+  ;(data || []).forEach(a => {
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td>${esc(usersMap[a.user_id]?.display_name || '-')}</td>
+      <td>${esc(a.phone || '-')}</td>
+      <td><div class="appeal-msg-box">${esc(a.message)}</div></td>
+      <td>${fmtDate(a.created_at)}</td>
+      <td><span class="chip ${a.status==='pending'?'chip-pend':a.status==='accepted'?'chip-res':'chip-ban'}">${a.status}</span></td>
+      <td style="display:flex;gap:6px">${a.status==='pending' ? `
+        <button class="act-btn act-ok" onclick="acceptAppeal('${a.id}','${a.user_id}')">✅ Terima & Unban</button>
+        <button class="act-btn act-ban" onclick="rejectAppeal('${a.id}')">❌ Tolak</button>
+      ` : '-'}</td>`
+    tbody.appendChild(tr)
+  })
+}
+
+window.acceptAppeal = async (id, uid) => {
+  if (!confirm('Unban pengguna ini dan terima banding?')) return
+  await sb.from('appeals').update({ status: 'accepted' }).eq('id', id)
+  await sb.from('profiles').update({ banned: false, banned_reason: null }).eq('id', uid)
+  toast('✅ Banding diterima, user di-unban')
+  await loadStats(); await loadUsers(); loadDashboard(); loadAppealsPage()
+}
+
+window.rejectAppeal = async id => {
+  await sb.from('appeals').update({ status: 'rejected' }).eq('id', id)
+  toast('❌ Banding ditolak'); loadDashboard(); loadAppealsPage()
+}
+
+// ── CS TICKETS ────────────────────────────────────────────────
+async function loadCSTickets() {
+  const { data } = await sb.from('cs_tickets').select('*').eq('status','open').order('created_at',{ascending:false})
+  const list = document.getElementById('csTicketList')
+  document.getElementById('csTicketCount').textContent = (data?.length || 0) + ' tiket'
+  if (!data?.length) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">Belum ada tiket terbuka</div>'
+    return
+  }
+  list.innerHTML = ''
+  data.forEach(t => {
+    const div = document.createElement('div')
+    div.className = 'cs-ticket-item' + (activeTicket?.id === t.id ? ' active' : '')
+    div.onclick = () => openTicket(t)
+    div.innerHTML = `
+      <div class="cs-ticket-name">${esc(t.display_name || t.phone || 'User')} <span class="cs-new-dot"></span></div>
+      <div class="cs-ticket-cat">${esc(t.category)}</div>
+      <div class="cs-ticket-time">${fmtDate(t.created_at)}</div>`
+    list.appendChild(div)
+  })
+}
+
+async function openTicket(ticket) {
+  activeTicket = ticket
+  document.getElementById('csEmptyState').style.display = 'none'
+  document.getElementById('csChatMain').style.display = 'flex'
+  document.getElementById('csChatMain').style.flexDirection = 'column'
+  document.getElementById('csChatUser').textContent = ticket.display_name || ticket.phone || 'User'
+  document.getElementById('csChatCat').textContent = 'Kategori: ' + ticket.category
+  await loadCSMessages(ticket.id)
+  loadCSTickets()
+  // Subscribe to new messages in this ticket
+  if (activeTicketChannel) await sb.removeChannel(activeTicketChannel)
+  activeTicketChannel = sb.channel('cs-dev-' + ticket.id)
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'cs_messages', filter:`ticket_id=eq.${ticket.id}`}, p => {
+      if (p.new.sender === 'user') {
+        const wrap = document.getElementById('csMsgsWrap')
+        const div = document.createElement('div')
+        div.className = 'cs-msg user'
+        div.innerHTML = `${esc(p.new.content)}<div class="cs-msg-time">${fmtTime(p.new.created_at)}</div>`
+        wrap.appendChild(div); wrap.scrollTop = wrap.scrollHeight
+      }
+    }).subscribe()
+}
+
+async function loadCSMessages(ticketId) {
+  const { data } = await sb.from('cs_messages').select('*').eq('ticket_id', ticketId).order('created_at',{ascending:true})
+  const wrap = document.getElementById('csMsgsWrap')
+  wrap.innerHTML = ''
+  ;(data || []).forEach(m => {
+    const div = document.createElement('div')
+    div.className = 'cs-msg ' + m.sender
+    div.innerHTML = `${esc(m.content)}<div class="cs-msg-time">${fmtTime(m.created_at)}</div>`
+    wrap.appendChild(div)
+  })
+  wrap.scrollTop = wrap.scrollHeight
+}
+
+window.sendCSReply = async () => {
+  if (!activeTicket) return
+  const inp = document.getElementById('csDevInput')
+  const text = inp.value.trim(); if (!text) return
+  inp.value = ''
+  const { data } = await sb.from('cs_messages').insert({ ticket_id: activeTicket.id, sender: 'developer', content: text }).select().single()
+  if (data) {
+    const wrap = document.getElementById('csMsgsWrap')
+    const div = document.createElement('div')
+    div.className = 'cs-msg dev'
+    div.innerHTML = `${esc(text)}<div class="cs-msg-time">${fmtTime(data.created_at)}</div>`
+    wrap.appendChild(div); wrap.scrollTop = wrap.scrollHeight
+  }
+}
+
+document.getElementById('csDevInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCSReply() }
+})
+
+function subscribeCSRealtime() {
+  sb.channel('cs-tickets-dev').on('postgres_changes', {event:'INSERT', schema:'public', table:'cs_tickets'}, p => {
+    loadCSTickets(); loadStats()
+    document.getElementById('csAlert').classList.add('show')
+    setBadge('nb-cs', (parseInt(document.getElementById('stCS').textContent)||0)+1)
+    toast('💬 Tiket CS baru dari ' + (p.new.display_name || p.new.phone || 'User'))
+  }).subscribe()
+}
+
+// ── MAILBOX ───────────────────────────────────────────────────
+window.sendMailbox = async () => {
+  const uid     = document.getElementById('mailTarget').value
+  const title   = document.getElementById('mailTitle').value.trim()
+  const content = document.getElementById('mailContent').value.trim()
+  const link    = document.getElementById('mailLink').value.trim()
+  if (!uid)     { toast('Pilih pengguna terlebih dahulu'); return }
+  if (!title)   { toast('Isi judul pesan'); return }
+  if (!content) { toast('Isi isi pesan'); return }
+  const { error } = await sb.from('mailbox').insert({ user_id: uid, title, content, link: link || null })
+  if (error) { toast('Gagal: ' + error.message); return }
+  document.getElementById('mailTarget').value = ''
+  document.getElementById('mailTitle').value = ''
+  document.getElementById('mailContent').value = ''
+  document.getElementById('mailLink').value = ''
+  showOk('mailSuccess')
+}
+
+// ── BROADCAST ─────────────────────────────────────────────────
+window.sendBroadcast = async () => {
+  const title   = document.getElementById('bcTitle').value.trim()
+  const content = document.getElementById('bcContent').value.trim()
+  const link    = document.getElementById('bcLink').value.trim()
+  if (!title || !content) { toast('Isi judul dan isi pesan'); return }
+  if (!confirm(`Kirim broadcast ke ${allUsers.length} pengguna? Tindakan ini tidak bisa dibatalkan.`)) return
+  const btn = document.getElementById('bcBtn')
+  btn.disabled = true; btn.textContent = '⏳ Mengirim...'
+  const rows = allUsers.map(u => ({ user_id: u.id, title, content, link: link || null }))
+  for (let i = 0; i < rows.length; i += 50) {
+    await sb.from('mailbox').insert(rows.slice(i, i+50))
+  }
+  btn.disabled = false; btn.textContent = '📢 Kirim ke Semua Pengguna'
+  document.getElementById('bcTitle').value = ''
+  document.getElementById('bcContent').value = ''
+  document.getElementById('bcLink').value = ''
+  showOk('bcSuccess')
+  toast(`✅ Broadcast terkirim ke ${allUsers.length} pengguna!`)
+}
+
+// ── PAGE NAVIGATION ───────────────────────────────────────────
+const PAGE_IDS = ['Dash','Users','Verify','Flag','Reports','Appeals','CS','Mailbox','Broadcast']
+
+window.showPage = (page, el) => {
+  // Update nav active state
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+  if (el) el.classList.add('active')
+  // Hide all pages
+  PAGE_IDS.forEach(p => {
+    const el = document.getElementById('page'+p); if (el) el.style.display = 'none'
+  })
+  // Show target page
+  const capPage = page.charAt(0).toUpperCase() + page.slice(1)
+  const target = document.getElementById('page'+capPage)
+  if (target) target.style.display = 'block'
+  // Load data for page
+  if (page === 'dash')    loadDashboard()
+  if (page === 'users')   { loadUsers() }
+  if (page === 'verify')  { loadUsers() }
+  if (page === 'flag')    { loadUsers() }
+  if (page === 'reports') loadReportsPage()
+  if (page === 'appeals') loadAppealsPage()
+  if (page === 'cs')      { loadCSTickets(); document.getElementById('csAlert').classList.remove('show') }
+}
+
+// ── BOOT ──────────────────────────────────────────────────────
+init()
+</script>
+</body>
+</html>
