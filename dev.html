@@ -101,6 +101,8 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
 .chip-pend { background:rgba(245,158,11,.12); color:var(--warning); }
 .chip-info { background:rgba(14,165,233,.12); color:var(--info); }
 .chip-res { background:rgba(16,185,129,.08); color:var(--success); border:1px solid rgba(16,185,129,.2); }
+.chip-danger { background:rgba(239,68,68,.15); color:var(--danger); border:1px solid rgba(239,68,68,.3); font-weight:700; }
+.chip-locked { background:rgba(100,116,139,.12); color:var(--text-muted); }
 
 /* ── VERIFY BADGES ── */
 .vb { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; flex-shrink:0; }
@@ -134,6 +136,8 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
 .act-flag:hover { background:var(--danger); color:#fff; }
 .act-unflag { background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.3); color:var(--success); }
 .act-unflag:hover { background:var(--success); color:#fff; }
+.act-warn { background:rgba(245,158,11,.08); border-color:rgba(245,158,11,.3); color:var(--warning); }
+.act-warn:hover { background:var(--warning); color:#fff; }
 
 /* ── FORM ── */
 .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -191,6 +195,66 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
 
 /* Flag name style */
 .text-flag { color:var(--danger) !important; font-weight:700 !important; }
+
+/* ── MODAL ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:300; padding:20px; backdrop-filter:blur(4px); }
+.modal-box { background:var(--surface); border-radius:18px; padding:28px; width:100%; max-width:520px; border:1px solid var(--border); box-shadow:var(--shadow-lg); display:flex; flex-direction:column; gap:16px; max-height:85vh; overflow-y:auto; }
+.modal-title { font-size:16px; font-weight:800; display:flex; align-items:center; gap:8px; }
+.modal-close { margin-left:auto; background:transparent; border:none; font-size:20px; cursor:pointer; color:var(--text-muted); line-height:1; }
+.modal-close:hover { color:var(--danger); }
+
+/* ── BADGE LENCANA ── */
+.user-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px 3px 6px; border-radius:20px; font-size:11px; font-weight:700; border:1.5px solid; }
+.badge-icon { width:16px; height:16px; flex-shrink:0; }
+
+/* ── COMMUNITY GROUP ── */
+.group-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; transition:.2s; position:relative; }
+.group-card:hover { border-color:var(--border2); box-shadow:var(--shadow); }
+.group-card.danger-group { border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.02); }
+.group-card.locked-group { border-color:rgba(100,116,139,.3); opacity:.7; }
+.group-hdr { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.group-avatar { width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; font-weight:800; flex-shrink:0; }
+.group-name { font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.group-desc { font-size:12px; color:var(--text-muted); margin-top:2px; }
+.group-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.group-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+.group-verify-badge { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:20px; background:rgba(14,165,233,.12); color:var(--info); font-size:10px; font-weight:700; }
+.group-tag { display:inline-flex; padding:2px 7px; border-radius:20px; background:var(--surface3); color:var(--text-muted); font-size:10px; font-weight:600; }
+.group-threat { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:20px; background:rgba(239,68,68,.12); color:var(--danger); font-size:10px; font-weight:700; border:1px solid rgba(239,68,68,.2); }
+.group-other-tag { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:20px; background:rgba(245,158,11,.12); color:var(--warning); font-size:10px; font-weight:700; border:1px solid rgba(245,158,11,.2); }
+.group-locked-tag { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:20px; background:rgba(100,116,139,.1); color:var(--text-muted); font-size:10px; font-weight:700; }
+
+/* Member list inside modal */
+.member-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+.member-row:last-child { border-bottom:none; }
+.member-avatar { width:32px; height:32px; border-radius:9px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:700; flex-shrink:0; }
+.member-name { font-size:13px; font-weight:600; }
+.member-info { font-size:11px; color:var(--text-muted); }
+.member-spacer { flex:1; }
+.role-chip { padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+.role-owner { background:rgba(245,158,11,.15); color:var(--warning); }
+.role-admin { background:rgba(14,165,233,.15); color:var(--info); }
+.role-member { background:rgba(100,116,139,.1); color:var(--text-muted); }
+
+/* Color picker for badge */
+.color-options { display:flex; gap:6px; flex-wrap:wrap; }
+.color-opt { width:26px; height:26px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:.15s; }
+.color-opt.selected { border-color:var(--text); transform:scale(1.15); }
+
+/* Insight panel */
+.insight-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px; }
+.insight-card { background:var(--surface2); border-radius:10px; padding:12px; text-align:center; }
+.insight-val { font-size:20px; font-weight:800; color:var(--accent); }
+.insight-lbl { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+
+/* Tab row */
+.tab-row { display:flex; gap:6px; padding:12px 16px; border-bottom:1px solid var(--border); }
+.tab-btn { padding:6px 14px; border-radius:8px; border:1.5px solid var(--border); background:transparent; color:var(--text-muted); font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:.15s; }
+.tab-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+/* ── BANNER IMAGE PREVIEW ── */
+.banner-preview { width:100%; height:80px; border-radius:10px; object-fit:cover; border:1px solid var(--border); }
+.banner-placeholder { width:100%; height:80px; border-radius:10px; background:linear-gradient(135deg,var(--surface2),var(--surface3)); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:12px; border:1px dashed var(--border2); }
 </style>
 </head>
 <body>
@@ -255,6 +319,7 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
 
     <div class="nav-section-label">Moderasi</div>
     <div class="nav-item" data-page="verify" onclick="showPage('verify',this)">✅ Verifikasi</div>
+    <div class="nav-item" data-page="badge" onclick="showPage('badge',this)">🏅 Lencana Pengguna</div>
     <div class="nav-item" data-page="flag" onclick="showPage('flag',this)">
       ⚠️ Tandai Akun
       <span class="nav-badge" id="nb-flag"></span>
@@ -266,6 +331,12 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
     <div class="nav-item" data-page="appeals" onclick="showPage('appeals',this)">
       📝 Banding
       <span class="nav-badge" id="nb-appeals"></span>
+    </div>
+
+    <div class="nav-section-label">Community</div>
+    <div class="nav-item" data-page="groups" onclick="showPage('groups',this)">
+      🏘️ Grup Community
+      <span class="nav-badge" id="nb-groups"></span>
     </div>
 
     <div class="nav-section-label">Komunikasi</div>
@@ -289,6 +360,7 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
         <div class="stat-card"><div class="stat-icon">🚨</div><div><div class="stat-val" id="stReports">0</div><div class="stat-lbl">Laporan Pending</div></div></div>
         <div class="stat-card"><div class="stat-icon">📝</div><div><div class="stat-val" id="stAppeals">0</div><div class="stat-lbl">Banding Pending</div></div></div>
         <div class="stat-card"><div class="stat-icon">💬</div><div><div class="stat-val" id="stCS">0</div><div class="stat-lbl">Tiket CS Open</div></div></div>
+        <div class="stat-card"><div class="stat-icon">🏘️</div><div><div class="stat-val" id="stGroups">0</div><div class="stat-lbl">Total Grup</div></div></div>
       </div>
       <div class="section">
         <div class="section-hdr"><div class="section-title">📝 Banding Terbaru</div><button class="act-btn act-ok" onclick="showPage('appeals',document.querySelector('[data-page=appeals]'))">Lihat Semua</button></div>
@@ -328,6 +400,64 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
             <thead><tr><th>Nama</th><th>Username</th><th>HP</th><th>Centang Verifikasi</th><th>Banner Nama</th></tr></thead>
             <tbody id="verifyTbody"></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BADGE / LENCANA ══ -->
+    <div id="pageBadge" style="display:none">
+      <div class="section">
+        <div class="section-hdr">
+          <div class="section-title">🏅 Kelola Lencana Pengguna</div>
+          <div style="font-size:12px;color:var(--text-muted)">Berikan lencana penghargaan kepada pengguna</div>
+        </div>
+        <div class="section-body">
+          <!-- Form tambah lencana -->
+          <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid var(--border)">
+            <div style="font-size:13px;font-weight:700;margin-bottom:12px">➕ Tambah Lencana ke Pengguna</div>
+            <div class="form-grid">
+              <div class="fg">
+                <label>Pilih Pengguna</label>
+                <select class="form-select" id="badgeTarget"><option value="">-- Pilih pengguna --</option></select>
+              </div>
+              <div class="fg">
+                <label>Nama Penghargaan</label>
+                <input class="form-input" id="badgeName" placeholder="Contoh: Top Contributor...">
+              </div>
+              <div class="fg">
+                <label>Logo Lencana</label>
+                <select class="form-select" id="badgeIcon">
+                  <option value="trophy">🏆 Piala</option>
+                  <option value="scroll">📜 Piagam</option>
+                  <option value="clock">⏱ Jam</option>
+                  <option value="coin">💰 Uang</option>
+                  <option value="person">👤 Orang</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Warna Teks</label>
+                <div class="color-options" id="badgeColorPicker">
+                  <div class="color-opt selected" data-color="#0ea5e9" style="background:#0ea5e9" onclick="selectBadgeColor('#0ea5e9',this)" title="Biru"></div>
+                  <div class="color-opt" data-color="#10b981" style="background:#10b981" onclick="selectBadgeColor('#10b981',this)" title="Hijau"></div>
+                  <div class="color-opt" data-color="#f59e0b" style="background:#f59e0b" onclick="selectBadgeColor('#f59e0b',this)" title="Gold"></div>
+                  <div class="color-opt" data-color="#ef4444" style="background:#ef4444" onclick="selectBadgeColor('#ef4444',this)" title="Merah"></div>
+                  <div class="color-opt" data-color="#8b5cf6" style="background:#8b5cf6" onclick="selectBadgeColor('#8b5cf6',this)" title="Ungu"></div>
+                  <div class="color-opt" data-color="#ec4899" style="background:#ec4899" onclick="selectBadgeColor('#ec4899',this)" title="Pink"></div>
+                  <div class="color-opt" data-color="#06b6d4" style="background:#06b6d4" onclick="selectBadgeColor('#06b6d4',this)" title="Cyan"></div>
+                  <div class="color-opt" data-color="#64748b" style="background:#64748b" onclick="selectBadgeColor('#64748b',this)" title="Abu-abu"></div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+              <div style="font-size:12px;color:var(--text-muted)">Preview:</div>
+              <div id="badgePreview" style="display:inline-flex"></div>
+            </div>
+            <button class="submit-btn" onclick="grantBadge()" style="margin-top:14px">🏅 Berikan Lencana</button>
+            <div class="success-msg" id="badgeSuccess">✅ Lencana berhasil diberikan!</div>
+          </div>
+          <!-- Daftar pengguna dengan lencana -->
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px">Pengguna dengan Lencana</div>
+          <div id="badgeUserList"><div style="color:var(--text-muted);font-size:13px">Memuat...</div></div>
         </div>
       </div>
     </div>
@@ -376,10 +506,31 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
       </div>
     </div>
 
+    <!-- ══ GROUPS COMMUNITY ══ -->
+    <div id="pageGroups" style="display:none">
+      <div class="section" style="margin-bottom:18px">
+        <div class="section-hdr">
+          <div class="section-title">🏘️ Kelola Grup Community</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input class="search-input" id="groupSearch" placeholder="Cari grup..." oninput="filterGroups()">
+          </div>
+        </div>
+        <!-- Filter tabs -->
+        <div class="tab-row">
+          <button class="tab-btn active" onclick="filterGroupTab('all',this)">Semua</button>
+          <button class="tab-btn" onclick="filterGroupTab('verified',this)">✅ Terverifikasi</button>
+          <button class="tab-btn" onclick="filterGroupTab('danger',this)">🚨 Berbahaya</button>
+          <button class="tab-btn" onclick="filterGroupTab('locked',this)">🔒 Dikunci</button>
+        </div>
+        <div class="section-body">
+          <div id="groupList"><div style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px">Memuat grup...</div></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ CS ══ -->
     <div id="pageCS" style="display:none">
       <div class="cs-layout">
-        <!-- Ticket List -->
         <div class="cs-ticket-panel">
           <div class="cs-panel-hdr">
             <div class="cs-panel-title">Tiket Masuk</div>
@@ -389,8 +540,6 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
             <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">Belum ada tiket</div>
           </div>
         </div>
-
-        <!-- Chat Panel -->
         <div class="cs-chat-panel">
           <div class="cs-empty-state" id="csEmptyState">
             <span style="font-size:40px">💬</span>
@@ -471,6 +620,111 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
 
 <div class="toast" id="toast"></div>
 
+<!-- ══ MODAL: GROUP DETAIL ══ -->
+<div class="modal-overlay" id="modalGroupDetail" style="display:none" onclick="if(event.target===this)closeModal('modalGroupDetail')">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="mgdIcon" style="font-size:22px"></span>
+      <span id="mgdName">Nama Grup</span>
+      <button class="modal-close" onclick="closeModal('modalGroupDetail')">×</button>
+    </div>
+
+    <!-- Tab nav -->
+    <div style="display:flex;gap:6px;border-bottom:1px solid var(--border);padding-bottom:10px">
+      <button class="tab-btn active" id="mgdTab1" onclick="switchMgdTab('info')">Info</button>
+      <button class="tab-btn" id="mgdTab2" onclick="switchMgdTab('members')">Member</button>
+      <button class="tab-btn" id="mgdTab3" onclick="switchMgdTab('insight')">Insight</button>
+      <button class="tab-btn" id="mgdTab4" onclick="switchMgdTab('settings')">Pengaturan</button>
+    </div>
+
+    <!-- Tab Info -->
+    <div id="mgdTabInfo">
+      <div id="mgdBannerWrap"></div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:8px" id="mgdDesc">-</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px" id="mgdTags"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+        <div style="background:var(--surface2);border-radius:8px;padding:10px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Owner</div>
+          <div style="font-size:13px;font-weight:600;margin-top:3px" id="mgdOwner">-</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Dibuat</div>
+          <div style="font-size:13px;font-weight:600;margin-top:3px" id="mgdCreated">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Members -->
+    <div id="mgdTabMembers" style="display:none">
+      <div id="mgdMemberList"><div style="color:var(--text-muted);font-size:13px">Memuat...</div></div>
+    </div>
+
+    <!-- Tab Insight -->
+    <div id="mgdTabInsight" style="display:none">
+      <div class="insight-grid">
+        <div class="insight-card"><div class="insight-val" id="mgdTotalMembers">0</div><div class="insight-lbl">Total Member</div></div>
+        <div class="insight-card"><div class="insight-val" id="mgdAdminCount">0</div><div class="insight-lbl">Admin</div></div>
+        <div class="insight-card"><div class="insight-val" id="mgdOwnerCount">1</div><div class="insight-lbl">Owner</div></div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:12px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px">Pertumbuhan Member</div>
+        <div style="font-size:13px;color:var(--text-muted)">Data insight real-time dari Supabase tersedia melalui tabel <code>group_members</code>.</div>
+      </div>
+    </div>
+
+    <!-- Tab Settings (dev controls) -->
+    <div id="mgdTabSettings" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Verifikasi & Label</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="act-btn act-ok" id="btnVerifyGroup" onclick="toggleGroupVerified()">✅ Beri Verifikasi</button>
+          <button class="act-btn act-warn" id="btnTagGroup" onclick="openTagModal()">🏷️ Ubah Tag</button>
+          <button class="act-btn act-warn" id="btnBannerGroup" onclick="openBannerModal()">🖼️ Atur Banner</button>
+        </div>
+
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Tanda Ancaman</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="act-btn act-flag" id="btnDangerGroup" onclick="toggleGroupDanger()">🚨 Tandai Berbahaya</button>
+          <button class="act-btn act-warn" id="btnOtherGroup" onclick="toggleGroupOther()">⚠️ Tandai Lainnya</button>
+        </div>
+
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Akses Grup</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="act-btn act-warn" id="btnLockGroup" onclick="toggleGroupLock()">🔒 Tutup Akses</button>
+          <button class="act-btn act-ban" id="btnDeleteGroup" onclick="deleteGroup()">🗑️ Hapus Grup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: TAG GRUP ══ -->
+<div class="modal-overlay" id="modalTag" style="display:none" onclick="if(event.target===this)closeModal('modalTag')">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-title">🏷️ Ubah Tag Grup <button class="modal-close" onclick="closeModal('modalTag')">×</button></div>
+    <div class="fg">
+      <label>Tag Grup (pisahkan dengan koma)</label>
+      <input class="form-input" id="tagInput" placeholder="Contoh: gaming, diskusi, hiburan">
+    </div>
+    <button class="submit-btn" onclick="saveGroupTag()">Simpan Tag</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: BANNER GRUP ══ -->
+<div class="modal-overlay" id="modalBanner" style="display:none" onclick="if(event.target===this)closeModal('modalBanner')">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-title">🖼️ Atur Banner Grup <button class="modal-close" onclick="closeModal('modalBanner')">×</button></div>
+    <div class="fg">
+      <label>URL Gambar Banner</label>
+      <input class="form-input" id="bannerInput" placeholder="https://...">
+    </div>
+    <div id="bannerPreviewWrap" style="margin-top:8px">
+      <div class="banner-placeholder">Preview banner akan muncul di sini</div>
+    </div>
+    <button class="submit-btn" onclick="saveGroupBanner()">Simpan Banner</button>
+  </div>
+</div>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -486,6 +740,11 @@ let allUsers = []
 let usersMap = {}
 let activeTicket = null
 let activeTicketChannel = null
+let allGroups = []
+let activeGroup = null
+let selectedBadgeColor = '#0ea5e9'
+let currentGroupTab = 'info'
+let currentGroupFilterTab = 'all'
 
 // ── UTILS ─────────────────────────────────────────────────────
 const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -507,6 +766,7 @@ function setBadge(id, count) {
   el.textContent = count || 0
   el.classList.toggle('show', (count || 0) > 0)
 }
+window.closeModal = id => document.getElementById(id).style.display = 'none'
 
 // ── THEME ─────────────────────────────────────────────────────
 function initTheme() {
@@ -527,6 +787,95 @@ function vBadgeHtml(u) {
   if (u?.verified_blue)  h += `<span class="vb b"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>`
   if (u?.verified_gold)  h += `<span class="vb go"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>`
   return h
+}
+
+// ── BADGE ICON SVG ─────────────────────────────────────────────
+function badgeIconSvg(icon, color) {
+  const svgs = {
+    trophy: `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M12 17v4"/><path d="M8 21h8"/><path d="M6 5h12v6a6 6 0 0 1-12 0z"/></svg>`,
+    scroll:  `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+    clock:   `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    coin:    `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2m-3-8h6m-6 4h6"/><line x1="9" y1="9" x2="10.5" y2="9"/></svg>`,
+    person:  `<svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
+  }
+  return svgs[icon] || svgs.trophy
+}
+
+function renderBadge(badge) {
+  const c = badge.text_color || '#0ea5e9'
+  return `<span class="user-badge" style="color:${c};border-color:${c}30;background:${c}10">${badgeIconSvg(badge.icon, c)} ${esc(badge.name)}</span>`
+}
+
+// ── BADGE COLOR PICKER ─────────────────────────────────────────
+window.selectBadgeColor = (color, el) => {
+  selectedBadgeColor = color
+  document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'))
+  el.classList.add('selected')
+  updateBadgePreview()
+}
+
+function updateBadgePreview() {
+  const name = document.getElementById('badgeName').value || 'Lencana'
+  const icon = document.getElementById('badgeIcon').value
+  const c = selectedBadgeColor
+  document.getElementById('badgePreview').innerHTML = renderBadge({ name, icon, text_color: c })
+}
+
+document.getElementById('badgeName').addEventListener('input', updateBadgePreview)
+document.getElementById('badgeIcon').addEventListener('change', updateBadgePreview)
+updateBadgePreview()
+
+// ── GRANT BADGE ────────────────────────────────────────────────
+window.grantBadge = async () => {
+  const uid  = document.getElementById('badgeTarget').value
+  const name = document.getElementById('badgeName').value.trim()
+  const icon = document.getElementById('badgeIcon').value
+  const color = selectedBadgeColor
+  if (!uid) { toast('Pilih pengguna terlebih dahulu'); return }
+  if (!name) { toast('Isi nama penghargaan'); return }
+  const badge = { name, icon, text_color: color }
+  // Read existing badges from profile, append new one
+  const u = usersMap[uid]
+  let badges = []
+  try { badges = JSON.parse(u?.badges || '[]') } catch(e) { badges = [] }
+  badges.push(badge)
+  const { error } = await sb.from('profiles').update({ badges: JSON.stringify(badges) }).eq('id', uid)
+  if (error) { toast('Gagal: ' + error.message); return }
+  if (usersMap[uid]) usersMap[uid].badges = JSON.stringify(badges)
+  allUsers = allUsers.map(u => u.id === uid ? {...u, badges: JSON.stringify(badges)} : u)
+  showOk('badgeSuccess')
+  toast('🏅 Lencana berhasil diberikan!')
+  renderBadgeUserList()
+}
+
+window.revokeBadge = async (uid, idx) => {
+  if (!confirm('Hapus lencana ini?')) return
+  const u = usersMap[uid]
+  let badges = []
+  try { badges = JSON.parse(u?.badges || '[]') } catch(e) {}
+  badges.splice(idx, 1)
+  const { error } = await sb.from('profiles').update({ badges: JSON.stringify(badges) }).eq('id', uid)
+  if (error) { toast('Gagal: ' + error.message); return }
+  if (usersMap[uid]) usersMap[uid].badges = JSON.stringify(badges)
+  allUsers = allUsers.map(u => u.id === uid ? {...u, badges: JSON.stringify(badges)} : u)
+  toast('Lencana dihapus'); renderBadgeUserList()
+}
+
+function renderBadgeUserList() {
+  const wrap = document.getElementById('badgeUserList')
+  const withBadges = allUsers.filter(u => { try { return JSON.parse(u.badges||'[]').length > 0 } catch(e){ return false } })
+  if (!withBadges.length) {
+    wrap.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Belum ada pengguna dengan lencana.</div>'
+    return
+  }
+  wrap.innerHTML = withBadges.map(u => {
+    let badges = []
+    try { badges = JSON.parse(u.badges||'[]') } catch(e) {}
+    return `<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:0 0 140px;font-size:13px;font-weight:600">${esc(u.display_name||'-')}<div style="font-size:11px;color:var(--text-muted)">${esc(u.username?'@'+u.username:'')}</div></div>
+      <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap">${badges.map((b,i) => `<span style="display:inline-flex;align-items:center;gap:4px">${renderBadge(b)}<button onclick="revokeBadge('${u.id}',${i})" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:12px;padding:0 2px" title="Hapus">×</button></span>`).join('')}</div>
+    </div>`
+  }).join('')
 }
 
 // ── AUTH ──────────────────────────────────────────────────────
@@ -574,13 +923,14 @@ async function startApp() {
 
 // ── STATS ─────────────────────────────────────────────────────
 async function loadStats() {
-  const [users, banned, flagged, reports, appeals, cs] = await Promise.all([
+  const [users, banned, flagged, reports, appeals, cs, groups] = await Promise.all([
     sb.from('profiles').select('*', {count:'exact', head:true}).neq('role','developer'),
     sb.from('profiles').select('*', {count:'exact', head:true}).eq('banned', true),
     sb.from('profiles').select('*', {count:'exact', head:true}).eq('flagged', true),
     sb.from('reports').select('*', {count:'exact', head:true}).eq('status','pending'),
     sb.from('appeals').select('*', {count:'exact', head:true}).eq('status','pending'),
-    sb.from('cs_tickets').select('*', {count:'exact', head:true}).eq('status','open')
+    sb.from('cs_tickets').select('*', {count:'exact', head:true}).eq('status','open'),
+    sb.from('community_groups').select('*', {count:'exact', head:true})
   ])
   document.getElementById('stUsers').textContent   = users.count   || 0
   document.getElementById('stBanned').textContent  = banned.count  || 0
@@ -588,6 +938,7 @@ async function loadStats() {
   document.getElementById('stReports').textContent = reports.count || 0
   document.getElementById('stAppeals').textContent = appeals.count || 0
   document.getElementById('stCS').textContent      = cs.count      || 0
+  document.getElementById('stGroups').textContent  = groups.count  || 0
   setBadge('nb-flag',    flagged.count)
   setBadge('nb-reports', reports.count)
   setBadge('nb-appeals', appeals.count)
@@ -612,6 +963,16 @@ async function loadUsers() {
     opt.textContent = `${u.display_name || '?'} (${u.phone || u.username || u.id.substring(0,8)})`
     sel.appendChild(opt)
   })
+  // Badge target dropdown
+  const bsel = document.getElementById('badgeTarget')
+  bsel.innerHTML = '<option value="">-- Pilih pengguna --</option>'
+  allUsers.forEach(u => {
+    const opt = document.createElement('option')
+    opt.value = u.id
+    opt.textContent = `${u.display_name || '?'} (${u.username || u.id.substring(0,8)})`
+    bsel.appendChild(opt)
+  })
+  renderBadgeUserList()
 }
 
 // ── RENDER USER TABLE ─────────────────────────────────────────
@@ -621,8 +982,15 @@ function renderUserTable(users) {
   users.forEach(u => {
     const tr = document.createElement('tr')
     const isFlagged = u.flagged
+    let badges = []
+    try { badges = JSON.parse(u.badges||'[]') } catch(e) {}
     tr.innerHTML = `
-      <td><span class="${isFlagged ? 'text-flag' : ''}" style="display:flex;align-items:center;gap:4px">${esc(u.display_name || '-')}${isFlagged ? '<span style="font-size:11px">⚠️</span>' : ''}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+          <span class="${isFlagged ? 'text-flag' : ''}">${esc(u.display_name || '-')}${isFlagged ? '<span style="font-size:11px"> ⚠️</span>' : ''}</span>
+          ${badges.map(b => renderBadge(b)).join('')}
+        </div>
+      </td>
       <td>${esc(u.username ? '@'+u.username : '-')}</td>
       <td><span class="${isFlagged ? 'text-flag' : ''}">${esc(u.phone || '-')}</span></td>
       <td style="display:flex;align-items:center;gap:3px">${vBadgeHtml(u) || '<span style="color:var(--text-light);font-size:11px">-</span>'}</td>
@@ -740,7 +1108,6 @@ window.unflagUser = async id => {
 
 // ── DASHBOARD ─────────────────────────────────────────────────
 async function loadDashboard() {
-  // Recent appeals
   const { data: ap } = await sb.from('appeals').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(5)
   const apDiv = document.getElementById('dashAppeals')
   if (!ap?.length) {
@@ -762,7 +1129,6 @@ async function loadDashboard() {
       </table>`
   }
 
-  // Recent reports
   const { data: rp } = await sb.from('reports').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(5)
   const rpDiv = document.getElementById('dashReports')
   if (!rp?.length) {
@@ -893,7 +1259,6 @@ async function openTicket(ticket) {
   document.getElementById('csChatCat').textContent = 'Kategori: ' + ticket.category
   await loadCSMessages(ticket.id)
   loadCSTickets()
-  // Subscribe to new messages in this ticket
   if (activeTicketChannel) await sb.removeChannel(activeTicketChannel)
   activeTicketChannel = sb.channel('cs-dev-' + ticket.id)
     .on('postgres_changes', {event:'INSERT', schema:'public', table:'cs_messages', filter:`ticket_id=eq.${ticket.id}`}, p => {
@@ -987,28 +1352,376 @@ window.sendBroadcast = async () => {
   toast(`✅ Broadcast terkirim ke ${allUsers.length} pengguna!`)
 }
 
+// ══════════════════════════════════════════════════════════════
+// ── COMMUNITY GROUPS ──────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+
+async function loadGroups() {
+  const { data, error } = await sb.from('community_groups')
+    .select(`*, owner:profiles!community_groups_owner_id_fkey(display_name, username)`)
+    .order('created_at', {ascending: false})
+  if (error) {
+    // Fallback jika join belum ada
+    const { data: d2 } = await sb.from('community_groups').select('*').order('created_at', {ascending: false})
+    allGroups = d2 || []
+  } else {
+    allGroups = data || []
+  }
+  renderGroupList(allGroups)
+  setBadge('nb-groups', allGroups.filter(g => g.is_danger || g.threat_other).length)
+}
+
+function groupTagsHtml(g) {
+  let html = ''
+  if (g.is_verified)  html += `<span class="group-verify-badge"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg> Terverifikasi</span>`
+  if (g.is_danger)    html += `<span class="group-threat">🚨 Berbahaya</span>`
+  if (g.threat_other) html += `<span class="group-other-tag">⚠️ ${esc(g.threat_label||'Perlu Perhatian')}</span>`
+  if (g.is_locked)    html += `<span class="group-locked-tag">🔒 Dikunci</span>`
+  if (g.tags) {
+    try {
+      const tags = typeof g.tags === 'string' ? g.tags.split(',') : (g.tags || [])
+      tags.forEach(t => { if (t.trim()) html += `<span class="group-tag">${esc(t.trim())}</span>` })
+    } catch(e) {}
+  }
+  return html
+}
+
+function renderGroupList(groups) {
+  const wrap = document.getElementById('groupList')
+  if (!groups.length) {
+    wrap.innerHTML = '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px">Belum ada grup community</div>'
+    return
+  }
+  wrap.innerHTML = groups.map(g => {
+    const letter = (g.name||'G')[0].toUpperCase()
+    const cls = g.is_danger ? 'group-card danger-group' : g.is_locked ? 'group-card locked-group' : 'group-card'
+    const ownerName = g.owner?.display_name || usersMap[g.owner_id]?.display_name || g.owner_id?.substring(0,8) || '-'
+    return `<div class="${cls}" onclick="openGroupDetail('${g.id}')">
+      <div class="group-hdr">
+        ${g.banner_url ? `<div style="width:44px;height:44px;border-radius:12px;overflow:hidden;flex-shrink:0"><img src="${esc(g.banner_url)}" style="width:100%;height:100%;object-fit:cover"/></div>` : `<div class="group-avatar">${letter}</div>`}
+        <div style="flex:1;min-width:0">
+          <div class="group-name">${esc(g.name)} ${groupTagsHtml(g)}</div>
+          <div class="group-desc">${esc(g.description||'Tidak ada deskripsi')}</div>
+        </div>
+      </div>
+      <div class="group-meta">
+        <span style="font-size:11px;color:var(--text-muted)">👤 Owner: <strong>${esc(ownerName)}</strong></span>
+        <span style="font-size:11px;color:var(--text-muted)">👥 ${g.member_count||0} member</span>
+        <span style="font-size:11px;color:var(--text-muted)">${fmtDate(g.created_at)}</span>
+      </div>
+      <div class="group-actions">
+        <button class="act-btn act-ok" onclick="event.stopPropagation();openGroupDetail('${g.id}')">🔍 Detail & Insight</button>
+        <button class="act-btn ${g.is_locked ? 'act-unban' : 'act-warn'}" onclick="event.stopPropagation();quickToggleLock('${g.id}',${!g.is_locked})">${g.is_locked ? '🔓 Buka Akses' : '🔒 Kunci'}</button>
+        <button class="act-btn ${g.is_danger ? 'act-unflag' : 'act-flag'}" onclick="event.stopPropagation();quickToggleDanger('${g.id}',${!g.is_danger})">${g.is_danger ? '✅ Hapus Ancaman' : '🚨 Tandai Berbahaya'}</button>
+        <button class="act-btn act-ban" onclick="event.stopPropagation();quickDeleteGroup('${g.id}')">🗑️ Hapus</button>
+      </div>
+    </div>`
+  }).join('')
+}
+
+window.filterGroups = () => {
+  const q = document.getElementById('groupSearch').value.toLowerCase()
+  const filtered = allGroups.filter(g => {
+    const matchSearch = (g.name||'').toLowerCase().includes(q) || (g.description||'').toLowerCase().includes(q)
+    const matchTab = currentGroupFilterTab === 'all' ? true
+      : currentGroupFilterTab === 'verified' ? g.is_verified
+      : currentGroupFilterTab === 'danger'   ? g.is_danger
+      : currentGroupFilterTab === 'locked'   ? g.is_locked
+      : true
+    return matchSearch && matchTab
+  })
+  renderGroupList(filtered)
+}
+
+window.filterGroupTab = (tab, el) => {
+  currentGroupFilterTab = tab
+  document.querySelectorAll('.tab-row .tab-btn').forEach(b => b.classList.remove('active'))
+  el.classList.add('active')
+  filterGroups()
+}
+
+// Quick actions from card
+window.quickToggleLock = async (id, val) => {
+  await sb.from('community_groups').update({ is_locked: val }).eq('id', id)
+  allGroups = allGroups.map(g => g.id === id ? {...g, is_locked: val} : g)
+  toast(val ? '🔒 Grup dikunci' : '🔓 Grup dibuka')
+  filterGroups()
+}
+
+window.quickToggleDanger = async (id, val) => {
+  if (val) {
+    const reason = prompt('Alasan grup berbahaya:')
+    if (!reason) return
+    await sb.from('community_groups').update({ is_danger: true, danger_reason: reason }).eq('id', id)
+    allGroups = allGroups.map(g => g.id === id ? {...g, is_danger: true, danger_reason: reason} : g)
+    toast('🚨 Grup ditandai berbahaya')
+  } else {
+    await sb.from('community_groups').update({ is_danger: false, danger_reason: null }).eq('id', id)
+    allGroups = allGroups.map(g => g.id === id ? {...g, is_danger: false, danger_reason: null} : g)
+    toast('✅ Tanda ancaman dihapus')
+  }
+  filterGroups()
+  setBadge('nb-groups', allGroups.filter(g => g.is_danger || g.threat_other).length)
+}
+
+window.quickDeleteGroup = async id => {
+  if (!confirm('Hapus grup ini secara permanen? Semua data member akan hilang.')) return
+  await sb.from('group_members').delete().eq('group_id', id)
+  await sb.from('community_groups').delete().eq('id', id)
+  allGroups = allGroups.filter(g => g.id !== id)
+  filterGroups(); loadStats()
+  toast('🗑️ Grup berhasil dihapus')
+}
+
+// ── GROUP DETAIL MODAL ────────────────────────────────────────
+window.openGroupDetail = async (id) => {
+  activeGroup = allGroups.find(g => g.id === id)
+  if (!activeGroup) return
+  const g = activeGroup
+  const ownerName = usersMap[g.owner_id]?.display_name || g.owner?.display_name || g.owner_id?.substring(0,8) || '-'
+
+  document.getElementById('mgdIcon').textContent = (g.name||'G')[0].toUpperCase()
+  document.getElementById('mgdName').textContent = g.name
+  document.getElementById('mgdDesc').textContent = g.description || 'Tidak ada deskripsi'
+  document.getElementById('mgdOwner').textContent = ownerName
+  document.getElementById('mgdCreated').textContent = fmtDate(g.created_at)
+
+  // Banner
+  const bannerWrap = document.getElementById('mgdBannerWrap')
+  bannerWrap.innerHTML = g.banner_url
+    ? `<img src="${esc(g.banner_url)}" class="banner-preview" onerror="this.style.display='none'">`
+    : `<div class="banner-placeholder">Tidak ada banner</div>`
+
+  // Tags
+  document.getElementById('mgdTags').innerHTML = groupTagsHtml(g)
+
+  // Update button states
+  updateGroupModalButtons(g)
+
+  switchMgdTab('info')
+  document.getElementById('modalGroupDetail').style.display = 'flex'
+
+  // Load members
+  loadGroupMembers(id)
+}
+
+function updateGroupModalButtons(g) {
+  const btnV = document.getElementById('btnVerifyGroup')
+  const btnD = document.getElementById('btnDangerGroup')
+  const btnO = document.getElementById('btnOtherGroup')
+  const btnL = document.getElementById('btnLockGroup')
+  btnV.textContent = g.is_verified ? '✅ Cabut Verifikasi' : '✅ Beri Verifikasi'
+  btnD.textContent = g.is_danger   ? '✅ Hapus Tanda Berbahaya' : '🚨 Tandai Berbahaya'
+  btnO.textContent = g.threat_other ? '✅ Hapus Tanda Lainnya' : '⚠️ Tandai Lainnya'
+  btnL.textContent = g.is_locked   ? '🔓 Buka Akses' : '🔒 Tutup Akses'
+}
+
+window.switchMgdTab = (tab) => {
+  currentGroupTab = tab
+  const tabs = { info: 'mgdTabInfo', members: 'mgdTabMembers', insight: 'mgdTabInsight', settings: 'mgdTabSettings' }
+  const btns = { info: 'mgdTab1', members: 'mgdTab2', insight: 'mgdTab3', settings: 'mgdTab4' }
+  Object.values(tabs).forEach(id => document.getElementById(id).style.display = 'none')
+  document.getElementById(tabs[tab]).style.display = 'block'
+  Object.values(btns).forEach(id => document.getElementById(id).classList.remove('active'))
+  document.getElementById(btns[tab]).classList.add('active')
+}
+
+async function loadGroupMembers(groupId) {
+  const { data } = await sb.from('group_members')
+    .select('*, profile:profiles(display_name, username, phone)')
+    .eq('group_id', groupId)
+    .order('joined_at', {ascending: false})
+
+  const wrap = document.getElementById('mgdMemberList')
+  if (!data?.length) {
+    wrap.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Belum ada member</div>'
+    return
+  }
+
+  // Insight data
+  const admins = data.filter(m => m.role === 'admin').length
+  const owners = data.filter(m => m.role === 'owner').length
+  document.getElementById('mgdTotalMembers').textContent = data.length
+  document.getElementById('mgdAdminCount').textContent = admins
+  document.getElementById('mgdOwnerCount').textContent = owners
+
+  wrap.innerHTML = data.map(m => {
+    const name = m.profile?.display_name || m.user_id?.substring(0,8) || '-'
+    const user = m.profile?.username ? '@'+m.profile.username : (m.profile?.phone || '')
+    const roleClass = m.role === 'owner' ? 'role-owner' : m.role === 'admin' ? 'role-admin' : 'role-member'
+    const roleLabel = m.role === 'owner' ? '👑 Owner' : m.role === 'admin' ? '⚙️ Admin' : '👤 Member'
+    return `<div class="member-row">
+      <div class="member-avatar">${name[0].toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
+        <div class="member-name">${esc(name)}</div>
+        <div class="member-info">${esc(user)}</div>
+      </div>
+      <span class="role-chip ${roleClass}">${roleLabel}</span>
+      ${m.role !== 'owner' ? `<button class="act-btn act-ban" onclick="kickGroupMember('${m.user_id}','${groupId}')" style="padding:3px 8px;font-size:11px">Kick</button>` : ''}
+    </div>`
+  }).join('')
+}
+
+window.kickGroupMember = async (uid, groupId) => {
+  if (!confirm('Kick member ini dari grup?')) return
+  await sb.from('group_members').delete().eq('user_id', uid).eq('group_id', groupId)
+  toast('Member berhasil di-kick')
+  loadGroupMembers(groupId)
+  // Update member_count
+  const { count } = await sb.from('group_members').select('*', {count:'exact',head:true}).eq('group_id', groupId)
+  await sb.from('community_groups').update({ member_count: count || 0 }).eq('id', groupId)
+  allGroups = allGroups.map(g => g.id === groupId ? {...g, member_count: count||0} : g)
+}
+
+window.toggleGroupVerified = async () => {
+  if (!activeGroup) return
+  const val = !activeGroup.is_verified
+  await sb.from('community_groups').update({ is_verified: val }).eq('id', activeGroup.id)
+  activeGroup.is_verified = val
+  allGroups = allGroups.map(g => g.id === activeGroup.id ? {...g, is_verified: val} : g)
+  document.getElementById('mgdTags').innerHTML = groupTagsHtml(activeGroup)
+  updateGroupModalButtons(activeGroup)
+  filterGroups()
+  toast(val ? '✅ Grup terverifikasi' : 'Verifikasi dicabut')
+}
+
+window.toggleGroupDanger = async () => {
+  if (!activeGroup) return
+  const val = !activeGroup.is_danger
+  if (val) {
+    const reason = prompt('Alasan tandai berbahaya:')
+    if (!reason) return
+    await sb.from('community_groups').update({ is_danger: true, danger_reason: reason }).eq('id', activeGroup.id)
+    activeGroup.is_danger = true; activeGroup.danger_reason = reason
+  } else {
+    await sb.from('community_groups').update({ is_danger: false, danger_reason: null }).eq('id', activeGroup.id)
+    activeGroup.is_danger = false; activeGroup.danger_reason = null
+  }
+  allGroups = allGroups.map(g => g.id === activeGroup.id ? {...g, ...activeGroup} : g)
+  document.getElementById('mgdTags').innerHTML = groupTagsHtml(activeGroup)
+  updateGroupModalButtons(activeGroup)
+  filterGroups()
+  setBadge('nb-groups', allGroups.filter(g => g.is_danger || g.threat_other).length)
+  toast(val ? '🚨 Grup ditandai berbahaya' : '✅ Tanda ancaman dihapus')
+}
+
+window.toggleGroupOther = async () => {
+  if (!activeGroup) return
+  const val = !activeGroup.threat_other
+  if (val) {
+    const label = prompt('Label tanda (contoh: Spam, Konten SARA, Tidak Pantas):')
+    if (!label) return
+    await sb.from('community_groups').update({ threat_other: true, threat_label: label }).eq('id', activeGroup.id)
+    activeGroup.threat_other = true; activeGroup.threat_label = label
+  } else {
+    await sb.from('community_groups').update({ threat_other: false, threat_label: null }).eq('id', activeGroup.id)
+    activeGroup.threat_other = false; activeGroup.threat_label = null
+  }
+  allGroups = allGroups.map(g => g.id === activeGroup.id ? {...g, ...activeGroup} : g)
+  document.getElementById('mgdTags').innerHTML = groupTagsHtml(activeGroup)
+  updateGroupModalButtons(activeGroup)
+  filterGroups()
+  toast(val ? '⚠️ Tanda lainnya ditambahkan' : 'Tanda dihapus')
+}
+
+window.toggleGroupLock = async () => {
+  if (!activeGroup) return
+  const val = !activeGroup.is_locked
+  await sb.from('community_groups').update({ is_locked: val }).eq('id', activeGroup.id)
+  activeGroup.is_locked = val
+  allGroups = allGroups.map(g => g.id === activeGroup.id ? {...g, is_locked: val} : g)
+  document.getElementById('mgdTags').innerHTML = groupTagsHtml(activeGroup)
+  updateGroupModalButtons(activeGroup)
+  filterGroups()
+  toast(val ? '🔒 Akses grup ditutup' : '🔓 Akses grup dibuka')
+}
+
+window.deleteGroup = async () => {
+  if (!activeGroup) return
+  if (!confirm(`Hapus grup "${activeGroup.name}" secara permanen? Semua data member akan hilang.`)) return
+  await sb.from('group_members').delete().eq('group_id', activeGroup.id)
+  await sb.from('community_groups').delete().eq('id', activeGroup.id)
+  allGroups = allGroups.filter(g => g.id !== activeGroup.id)
+  closeModal('modalGroupDetail')
+  filterGroups(); loadStats()
+  toast('🗑️ Grup berhasil dihapus')
+}
+
+// ── TAG MODAL ─────────────────────────────────────────────────
+window.openTagModal = () => {
+  if (!activeGroup) return
+  const cur = activeGroup.tags
+  document.getElementById('tagInput').value = typeof cur === 'string' ? cur : (cur||[]).join(', ')
+  document.getElementById('modalTag').style.display = 'flex'
+}
+
+window.saveGroupTag = async () => {
+  if (!activeGroup) return
+  const raw = document.getElementById('tagInput').value.trim()
+  await sb.from('community_groups').update({ tags: raw }).eq('id', activeGroup.id)
+  activeGroup.tags = raw
+  allGroups = allGroups.map(g => g.id === activeGroup.id ? {...g, tags: raw} : g)
+  document.getElementById('mgdTags').innerHTML = groupTagsHtml(activeGroup)
+  filterGroups()
+  closeModal('modalTag')
+  toast('🏷️ Tag grup disimpan')
+}
+
+// ── BANNER MODAL ──────────────────────────────────────────────
+window.openBannerModal = () => {
+  if (!activeGroup) return
+  document.getElementById('bannerInput').value = activeGroup.banner_url || ''
+  const prev = document.getElementById('bannerPreviewWrap')
+  prev.innerHTML = activeGroup.banner_url
+    ? `<img src="${esc(activeGroup.banner_url)}" class="banner-preview">`
+    : `<div class="banner-placeholder">Preview banner akan muncul di sini</div>`
+  document.getElementById('modalBanner').style.display = 'flex'
+}
+
+document.getElementById('bannerInput').addEventListener('input', function() {
+  const url = this.value.trim()
+  const prev = document.getElementById('bannerPreviewWrap')
+  prev.innerHTML = url
+    ? `<img src="${esc(url)}" class="banner-preview" onerror="this.parentNode.innerHTML='<div class=banner-placeholder>URL tidak valid</div>'">`
+    : `<div class="banner-placeholder">Preview banner akan muncul di sini</div>`
+})
+
+window.saveGroupBanner = async () => {
+  if (!activeGroup) return
+  const url = document.getElementById('bannerInput').value.trim()
+  await sb.from('community_groups').update({ banner_url: url || null }).eq('id', activeGroup.id)
+  activeGroup.banner_url = url || null
+  allGroups = allGroups.map(g => g.id === activeGroup.id ? {...g, banner_url: url||null} : g)
+  // Update modal banner
+  const bannerWrap = document.getElementById('mgdBannerWrap')
+  bannerWrap.innerHTML = url
+    ? `<img src="${esc(url)}" class="banner-preview">`
+    : `<div class="banner-placeholder">Tidak ada banner</div>`
+  filterGroups()
+  closeModal('modalBanner')
+  toast('🖼️ Banner grup disimpan')
+}
+
 // ── PAGE NAVIGATION ───────────────────────────────────────────
-const PAGE_IDS = ['Dash','Users','Verify','Flag','Reports','Appeals','CS','Mailbox','Broadcast']
+const PAGE_IDS = ['Dash','Users','Verify','Badge','Flag','Reports','Appeals','Groups','CS','Mailbox','Broadcast']
 
 window.showPage = (page, el) => {
-  // Update nav active state
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
   if (el) el.classList.add('active')
-  // Hide all pages
   PAGE_IDS.forEach(p => {
-    const el = document.getElementById('page'+p); if (el) el.style.display = 'none'
+    const e = document.getElementById('page'+p); if (e) e.style.display = 'none'
   })
-  // Show target page
   const capPage = page.charAt(0).toUpperCase() + page.slice(1)
   const target = document.getElementById('page'+capPage)
   if (target) target.style.display = 'block'
-  // Load data for page
   if (page === 'dash')    loadDashboard()
   if (page === 'users')   { loadUsers() }
   if (page === 'verify')  { loadUsers() }
+  if (page === 'badge')   { loadUsers() }
   if (page === 'flag')    { loadUsers() }
   if (page === 'reports') loadReportsPage()
   if (page === 'appeals') loadAppealsPage()
+  if (page === 'groups')  loadGroups()
   if (page === 'cs')      { loadCSTickets(); document.getElementById('csAlert').classList.remove('show') }
 }
 
