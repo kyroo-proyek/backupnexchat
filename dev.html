@@ -320,6 +320,8 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
     <div class="nav-section-label">Moderasi</div>
     <div class="nav-item" data-page="verify" onclick="showPage('verify',this)">✅ Verifikasi</div>
     <div class="nav-item" data-page="badge" onclick="showPage('badge',this)">🏅 Lencana Pengguna</div>
+    <div class="nav-item" data-page="banner" onclick="showPage('banner',this)">🎨 Banner Profile</div>
+    <div class="nav-item" data-page="groupbanner" onclick="showPage('groupbanner',this)">🖼️ Banner Grup</div>
     <div class="nav-item" data-page="flag" onclick="showPage('flag',this)">
       ⚠️ Tandai Akun
       <span class="nav-badge" id="nb-flag"></span>
@@ -458,6 +460,167 @@ body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',
           <!-- Daftar pengguna dengan lencana -->
           <div style="font-size:13px;font-weight:700;margin-bottom:10px">Pengguna dengan Lencana</div>
           <div id="badgeUserList"><div style="color:var(--text-muted);font-size:13px">Memuat...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BANNER PROFILE ══ -->
+    <div id="pageBanner" style="display:none">
+      <div class="section">
+        <div class="section-hdr">
+          <div class="section-title">🎨 Kelola Banner Profile Pengguna</div>
+          <div style="font-size:12px;color:var(--text-muted)">Banner tampil di profil pengguna di halaman utama</div>
+        </div>
+        <div class="section-body">
+          <div style="background:var(--surface2);border-radius:12px;padding:16px;border:1px solid var(--border);margin-bottom:16px">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px">🎨 Atur Banner Profile</div>
+            <div class="form-grid">
+              <div class="fg">
+                <label>Pilih Pengguna</label>
+                <select class="form-select" id="bannerProfileTarget"><option value="">-- Pilih pengguna --</option></select>
+              </div>
+              <div class="fg">
+                <label>Teks Banner</label>
+                <input class="form-input" id="bannerText" placeholder="Contoh: KREATOR TERVERIFIKASI" oninput="updateBannerPreview()">
+              </div>
+              <div class="fg">
+                <label>Warna Latar 1</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <input type="color" id="bannerBg1" value="#0ea5e9" onchange="updateBannerPreview()" style="width:44px;height:36px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:transparent;padding:2px">
+                  <input class="form-input" id="bannerBg1Hex" value="#0ea5e9" style="flex:1" oninput="syncColorInput('bannerBg1','bannerBg1Hex');updateBannerPreview()">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Warna Latar 2</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <input type="color" id="bannerBg2" value="#0284c7" onchange="updateBannerPreview()" style="width:44px;height:36px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:transparent;padding:2px">
+                  <input class="form-input" id="bannerBg2Hex" value="#0284c7" style="flex:1" oninput="syncColorInput('bannerBg2','bannerBg2Hex');updateBannerPreview()">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Warna Teks</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <input type="color" id="bannerTxtColor" value="#ffffff" onchange="updateBannerPreview()" style="width:44px;height:36px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:transparent;padding:2px">
+                  <input class="form-input" id="bannerTxtHex" value="#ffffff" style="flex:1" oninput="syncColorInput('bannerTxtColor','bannerTxtHex');updateBannerPreview()">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Ikon Banner (SVG)</label>
+                <select class="form-select" id="bannerIcon" onchange="updateBannerPreview()">
+                  <option value="none">— Tanpa Ikon —</option>
+                  <option value="shield">Perisai</option>
+                  <option value="star">Bintang</option>
+                  <option value="crown">Mahkota</option>
+                  <option value="diamond">Berlian</option>
+                  <option value="lightning">Petir</option>
+                  <option value="fire">Api</option>
+                  <option value="infinity">Tak Terbatas</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Efek Banner</label>
+                <select class="form-select" id="bannerEffect" onchange="updateBannerPreview()">
+                  <option value="none">— Tanpa Efek —</option>
+                  <option value="shimmer">Shimmer (Kilap)</option>
+                  <option value="wave">Wave (Garis)</option>
+                  <option value="pulse">Pulse (Detak)</option>
+                </select>
+              </div>
+            </div>
+            <!-- Live Preview -->
+            <div style="margin-top:14px">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;font-weight:600">PREVIEW:</div>
+              <div id="bannerLivePreview" style="border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+                <div style="padding:10px 16px;text-align:center;color:var(--text-muted);font-size:12px">Preview akan muncul saat Anda mengetik teks</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+              <button class="submit-btn" onclick="saveBannerProfile()">🎨 Terapkan Banner</button>
+              <button class="submit-btn" style="background:var(--surface2);color:var(--text-muted);border:1.5px solid var(--border);box-shadow:none" onclick="removeBannerProfile()">✕ Hapus Banner</button>
+            </div>
+            <div class="success-msg" id="bannerProfileSuccess">✅ Banner profil berhasil diterapkan!</div>
+          </div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px">Pengguna dengan Banner Aktif</div>
+          <div id="bannerUserList"><div style="color:var(--text-muted);font-size:13px">Memuat...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BANNER GRUP ══ -->
+    <div id="pageGroupbanner" style="display:none">
+      <div class="section">
+        <div class="section-hdr">
+          <div class="section-title">🖼️ Kelola Banner Grup Community</div>
+          <div style="font-size:12px;color:var(--text-muted)">Banner tampil di halaman detail dan chat grup</div>
+        </div>
+        <div class="section-body">
+          <div style="background:var(--surface2);border-radius:12px;padding:16px;border:1px solid var(--border);margin-bottom:16px">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px">🖼️ Atur Banner Grup</div>
+            <div class="form-grid">
+              <div class="fg">
+                <label>Pilih Grup</label>
+                <select class="form-select" id="bannerGroupTarget" onchange="loadGroupBannerPreview()"><option value="">-- Pilih grup --</option></select>
+              </div>
+              <div class="fg">
+                <label>Teks Banner</label>
+                <input class="form-input" id="gBannerText" placeholder="Contoh: GRUP RESMI NEXLINK" oninput="updateGBannerPreview()">
+              </div>
+              <div class="fg">
+                <label>Warna Latar 1</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <input type="color" id="gBannerBg1" value="#10b981" onchange="updateGBannerPreview()" style="width:44px;height:36px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:transparent;padding:2px">
+                  <input class="form-input" id="gBannerBg1Hex" value="#10b981" style="flex:1" oninput="syncColorInput('gBannerBg1','gBannerBg1Hex');updateGBannerPreview()">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Warna Latar 2</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <input type="color" id="gBannerBg2" value="#059669" onchange="updateGBannerPreview()" style="width:44px;height:36px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:transparent;padding:2px">
+                  <input class="form-input" id="gBannerBg2Hex" value="#059669" style="flex:1" oninput="syncColorInput('gBannerBg2','gBannerBg2Hex');updateGBannerPreview()">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Warna Teks</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <input type="color" id="gBannerTxtColor" value="#ffffff" onchange="updateGBannerPreview()" style="width:44px;height:36px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:transparent;padding:2px">
+                  <input class="form-input" id="gBannerTxtHex" value="#ffffff" style="flex:1" oninput="syncColorInput('gBannerTxtColor','gBannerTxtHex');updateGBannerPreview()">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Ikon Banner (SVG)</label>
+                <select class="form-select" id="gBannerIcon" onchange="updateGBannerPreview()">
+                  <option value="none">— Tanpa Ikon —</option>
+                  <option value="shield">Perisai</option>
+                  <option value="star">Bintang</option>
+                  <option value="crown">Mahkota</option>
+                  <option value="diamond">Berlian</option>
+                  <option value="lightning">Petir</option>
+                  <option value="fire">Api</option>
+                  <option value="infinity">Tak Terbatas</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Efek Banner</label>
+                <select class="form-select" id="gBannerEffect" onchange="updateGBannerPreview()">
+                  <option value="none">— Tanpa Efek —</option>
+                  <option value="shimmer">Shimmer (Kilap)</option>
+                  <option value="wave">Wave (Garis)</option>
+                  <option value="pulse">Pulse (Detak)</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:14px">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;font-weight:600">PREVIEW:</div>
+              <div id="gBannerLivePreview" style="border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+                <div style="padding:10px 16px;text-align:center;color:var(--text-muted);font-size:12px">Preview akan muncul saat Anda mengetik teks</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+              <button class="submit-btn" onclick="saveGBanner()">🖼️ Terapkan Banner Grup</button>
+              <button class="submit-btn" style="background:var(--surface2);color:var(--text-muted);border:1.5px solid var(--border);box-shadow:none" onclick="removeGBanner()">✕ Hapus Banner</button>
+            </div>
+            <div class="success-msg" id="gBannerSuccess">✅ Banner grup berhasil diterapkan!</div>
+          </div>
         </div>
       </div>
     </div>
@@ -954,25 +1117,29 @@ async function loadUsers() {
   renderUserTable(allUsers)
   renderVerifyTable(allUsers)
   renderFlagTable(allUsers)
+  renderBadgeUserList()
   // Populate mailbox target
   const sel = document.getElementById('mailTarget')
-  sel.innerHTML = '<option value="">-- Pilih pengguna --</option>'
-  allUsers.forEach(u => {
-    const opt = document.createElement('option')
-    opt.value = u.id
-    opt.textContent = `${u.display_name || '?'} (${u.phone || u.username || u.id.substring(0,8)})`
-    sel.appendChild(opt)
-  })
+  if (sel) {
+    sel.innerHTML = '<option value="">-- Pilih pengguna --</option>'
+    allUsers.forEach(u => {
+      const opt = document.createElement('option')
+      opt.value = u.id
+      opt.textContent = `${u.display_name || '?'} (${u.phone || u.username || u.id.substring(0,8)})`
+      sel.appendChild(opt)
+    })
+  }
   // Badge target dropdown
   const bsel = document.getElementById('badgeTarget')
-  bsel.innerHTML = '<option value="">-- Pilih pengguna --</option>'
-  allUsers.forEach(u => {
-    const opt = document.createElement('option')
-    opt.value = u.id
-    opt.textContent = `${u.display_name || '?'} (${u.username || u.id.substring(0,8)})`
-    bsel.appendChild(opt)
-  })
-  renderBadgeUserList()
+  if (bsel) {
+    bsel.innerHTML = '<option value="">-- Pilih pengguna --</option>'
+    allUsers.forEach(u => {
+      const opt = document.createElement('option')
+      opt.value = u.id
+      opt.textContent = `${u.display_name || '?'} (${u.username || u.id.substring(0,8)})`
+      bsel.appendChild(opt)
+    })
+  }
 }
 
 // ── RENDER USER TABLE ─────────────────────────────────────────
@@ -1703,7 +1870,7 @@ window.saveGroupBanner = async () => {
 }
 
 // ── PAGE NAVIGATION ───────────────────────────────────────────
-const PAGE_IDS = ['Dash','Users','Verify','Badge','Flag','Reports','Appeals','Groups','CS','Mailbox','Broadcast']
+const PAGE_IDS = ['Dash','Users','Verify','Badge','Banner','Groupbanner','Flag','Reports','Appeals','Groups','CS','Mailbox','Broadcast']
 
 window.showPage = (page, el) => {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
@@ -1714,15 +1881,190 @@ window.showPage = (page, el) => {
   const capPage = page.charAt(0).toUpperCase() + page.slice(1)
   const target = document.getElementById('page'+capPage)
   if (target) target.style.display = 'block'
-  if (page === 'dash')    loadDashboard()
-  if (page === 'users')   { loadUsers() }
-  if (page === 'verify')  { loadUsers() }
-  if (page === 'badge')   { loadUsers() }
-  if (page === 'flag')    { loadUsers() }
-  if (page === 'reports') loadReportsPage()
-  if (page === 'appeals') loadAppealsPage()
-  if (page === 'groups')  loadGroups()
-  if (page === 'cs')      { loadCSTickets(); document.getElementById('csAlert').classList.remove('show') }
+  if (page === 'dash')        loadDashboard()
+  if (page === 'users')       { loadUsers() }
+  if (page === 'verify')      { loadUsers() }
+  if (page === 'badge')       { loadUsers() }
+  if (page === 'banner')      { loadUsers(); loadBannerPage() }
+  if (page === 'groupbanner') { loadGroups(); loadGroupBannerPage() }
+  if (page === 'flag')        { loadUsers() }
+  if (page === 'reports')     loadReportsPage()
+  if (page === 'appeals')     loadAppealsPage()
+  if (page === 'groups')      loadGroups()
+  if (page === 'cs')          { loadCSTickets(); document.getElementById('csAlert').classList.remove('show') }
+}
+
+// ── BANNER ICONS SVG (same as index.html) ─────────────────────
+const DEV_BANNER_ICONS = {
+  shield:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  star:`<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  crown:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M4 20l2-12 6 6 4-8 4 8 2-6 2 12"/></svg>`,
+  diamond:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>`,
+  lightning:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  fire:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c6 0 10-4 10-9a10 10 0 0 0-3.5-7.5C18 8 16 9 15 8c1-2 0-4-2-5C13 5 11 8 9 8c-1-1-1.5-3-1.5-3A10 10 0 0 0 2 13c0 5 4 9 10 9z"/></svg>`,
+  infinity:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c-2-2.5-4-4-6-4a4 4 0 0 0 0 8c2 0 4-1.5 6-4z"/><path d="M12 12c2 2.5 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.5-6 4z"/></svg>`,
+  none: ''
+}
+
+function renderDevBannerPreview(text, bg1, bg2, txtColor, icon, effect) {
+  if (!text) return `<div style="padding:10px 16px;text-align:center;color:var(--text-muted);font-size:12px">Preview akan muncul saat Anda mengetik teks</div>`
+  const iconHtml = (DEV_BANNER_ICONS[icon] || '').replace(/stroke="currentColor"/g, `stroke="${txtColor}"`).replace(/fill="currentColor"/g, `fill="${txtColor}"`)
+  let effects = ''
+  if (effect === 'shimmer') effects = `<div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.15) 50%,transparent 100%);background-size:200% 100%;animation:shimmer 2.5s infinite linear"></div>`
+  else if (effect === 'wave') effects = `<div style="position:absolute;inset:0;opacity:.12;background-image:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.3) 10px,rgba(255,255,255,.3) 11px)"></div>`
+  else if (effect === 'pulse') effects = `<div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(255,255,255,.2) 0%,transparent 60%);animation:banner-pulse 3s ease-in-out infinite alternate"></div>`
+  return `<div style="padding:10px 16px;background:linear-gradient(135deg,${bg1},${bg2});display:flex;align-items:center;gap:8px;position:relative;overflow:hidden;min-height:44px">
+    ${effects}
+    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:8px;color:${txtColor};font-size:12px;font-weight:700;letter-spacing:.8px">
+      ${iconHtml} ${esc(text)}
+    </div>
+  </div>`
+}
+
+window.syncColorInput = (colorId, hexId) => {
+  const hex = document.getElementById(hexId)?.value
+  if (hex && /^#[0-9a-fA-F]{6}$/.test(hex)) {
+    const el = document.getElementById(colorId)
+    if (el) el.value = hex
+  }
+}
+
+window.updateBannerPreview = () => {
+  const text = document.getElementById('bannerText')?.value.trim() || ''
+  const bg1  = document.getElementById('bannerBg1Hex')?.value || '#0ea5e9'
+  const bg2  = document.getElementById('bannerBg2Hex')?.value || '#0284c7'
+  const txt  = document.getElementById('bannerTxtHex')?.value || '#ffffff'
+  const icon = document.getElementById('bannerIcon')?.value || 'none'
+  const fx   = document.getElementById('bannerEffect')?.value || 'none'
+  const prev = document.getElementById('bannerLivePreview')
+  if (prev) prev.innerHTML = renderDevBannerPreview(text, bg1, bg2, txt, icon, fx)
+}
+
+window.updateGBannerPreview = () => {
+  const text = document.getElementById('gBannerText')?.value.trim() || ''
+  const bg1  = document.getElementById('gBannerBg1Hex')?.value || '#10b981'
+  const bg2  = document.getElementById('gBannerBg2Hex')?.value || '#059669'
+  const txt  = document.getElementById('gBannerTxtHex')?.value || '#ffffff'
+  const icon = document.getElementById('gBannerIcon')?.value || 'none'
+  const fx   = document.getElementById('gBannerEffect')?.value || 'none'
+  const prev = document.getElementById('gBannerLivePreview')
+  if (prev) prev.innerHTML = renderDevBannerPreview(text, bg1, bg2, txt, icon, fx)
+}
+
+function loadBannerPage() {
+  // Populate user dropdown
+  const sel = document.getElementById('bannerProfileTarget')
+  if (sel) {
+    sel.innerHTML = '<option value="">-- Pilih pengguna --</option>'
+    allUsers.forEach(u => {
+      const opt = document.createElement('option')
+      opt.value = u.id
+      opt.textContent = `${u.display_name || '?'} (@${u.username || u.id.substring(0,8)})`
+      sel.appendChild(opt)
+    })
+  }
+  renderBannerUserList()
+}
+
+function renderBannerUserList() {
+  const wrap = document.getElementById('bannerUserList')
+  if (!wrap) return
+  const withBanner = allUsers.filter(u => u.custom_banner)
+  if (!withBanner.length) { wrap.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Belum ada pengguna dengan banner kustom.</div>'; return }
+  wrap.innerHTML = withBanner.map(u => {
+    let b = {};try{b = typeof u.custom_banner === 'string' ? JSON.parse(u.custom_banner) : (u.custom_banner||{})}catch(e){}
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:0 0 120px;font-size:13px;font-weight:600">${esc(u.display_name||'-')}<div style="font-size:11px;color:var(--text-muted)">@${esc(u.username||'')}</div></div>
+      <div style="flex:1;border-radius:8px;overflow:hidden">${renderDevBannerPreview(b.text||'',b.bg_color||'#0ea5e9',b.bg_color2||'#0284c7',b.text_color||'#fff',b.icon||'none',b.effect||'none')}</div>
+      <button onclick="removeBannerForUser('${u.id}')" style="padding:5px 10px;border-radius:7px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:var(--danger);font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">Hapus</button>
+    </div>`
+  }).join('')
+}
+
+window.saveBannerProfile = async () => {
+  const uid  = document.getElementById('bannerProfileTarget')?.value
+  const text = document.getElementById('bannerText')?.value.trim()
+  const bg1  = document.getElementById('bannerBg1Hex')?.value || '#0ea5e9'
+  const bg2  = document.getElementById('bannerBg2Hex')?.value || '#0284c7'
+  const txt  = document.getElementById('bannerTxtHex')?.value || '#ffffff'
+  const icon = document.getElementById('bannerIcon')?.value || 'none'
+  const fx   = document.getElementById('bannerEffect')?.value || 'none'
+  if (!uid) { toast('Pilih pengguna terlebih dahulu'); return }
+  if (!text) { toast('Isi teks banner'); return }
+  const banner = { text, bg_color: bg1, bg_color2: bg2, text_color: txt, icon, effect: fx }
+  const { error } = await sb.from('profiles').update({ custom_banner: JSON.stringify(banner) }).eq('id', uid)
+  if (error) { toast('Gagal: ' + error.message); return }
+  if (usersMap[uid]) usersMap[uid].custom_banner = JSON.stringify(banner)
+  allUsers = allUsers.map(u => u.id === uid ? {...u, custom_banner: JSON.stringify(banner)} : u)
+  showOk('bannerProfileSuccess'); renderBannerUserList()
+  toast('🎨 Banner profil berhasil diterapkan!')
+}
+
+window.removeBannerProfile = async () => {
+  const uid = document.getElementById('bannerProfileTarget')?.value
+  if (!uid) { toast('Pilih pengguna terlebih dahulu'); return }
+  await removeBannerForUser(uid)
+}
+
+window.removeBannerForUser = async (uid) => {
+  await sb.from('profiles').update({ custom_banner: null }).eq('id', uid)
+  if (usersMap[uid]) usersMap[uid].custom_banner = null
+  allUsers = allUsers.map(u => u.id === uid ? {...u, custom_banner: null} : u)
+  renderBannerUserList(); toast('Banner profil dihapus')
+}
+
+// Group banner functions
+function loadGroupBannerPage() {
+  const sel = document.getElementById('bannerGroupTarget')
+  if (!sel) return
+  sel.innerHTML = '<option value="">-- Pilih grup --</option>'
+  allGroups.forEach(g => {
+    const opt = document.createElement('option')
+    opt.value = g.id; opt.textContent = g.name; sel.appendChild(opt)
+  })
+}
+
+window.loadGroupBannerPreview = async () => {
+  const gid = document.getElementById('bannerGroupTarget')?.value
+  if (!gid) return
+  const g = allGroups.find(g => g.id === gid)
+  if (g?.custom_banner) {
+    try {
+      const b = typeof g.custom_banner === 'string' ? JSON.parse(g.custom_banner) : g.custom_banner
+      if (b.text) document.getElementById('gBannerText').value = b.text
+      if (b.bg_color) { document.getElementById('gBannerBg1').value = b.bg_color; document.getElementById('gBannerBg1Hex').value = b.bg_color }
+      if (b.bg_color2) { document.getElementById('gBannerBg2').value = b.bg_color2; document.getElementById('gBannerBg2Hex').value = b.bg_color2 }
+      if (b.text_color) { document.getElementById('gBannerTxtColor').value = b.text_color; document.getElementById('gBannerTxtHex').value = b.text_color }
+      if (b.icon) document.getElementById('gBannerIcon').value = b.icon
+      if (b.effect) document.getElementById('gBannerEffect').value = b.effect
+    } catch(e) {}
+  }
+  updateGBannerPreview()
+}
+
+window.saveGBanner = async () => {
+  const gid  = document.getElementById('bannerGroupTarget')?.value
+  const text = document.getElementById('gBannerText')?.value.trim()
+  const bg1  = document.getElementById('gBannerBg1Hex')?.value || '#10b981'
+  const bg2  = document.getElementById('gBannerBg2Hex')?.value || '#059669'
+  const txt  = document.getElementById('gBannerTxtHex')?.value || '#ffffff'
+  const icon = document.getElementById('gBannerIcon')?.value || 'none'
+  const fx   = document.getElementById('gBannerEffect')?.value || 'none'
+  if (!gid) { toast('Pilih grup terlebih dahulu'); return }
+  if (!text) { toast('Isi teks banner'); return }
+  const banner = { text, bg_color: bg1, bg_color2: bg2, text_color: txt, icon, effect: fx }
+  const { error } = await sb.from('community_groups').update({ custom_banner: JSON.stringify(banner) }).eq('id', gid)
+  if (error) { toast('Gagal: ' + error.message); return }
+  allGroups = allGroups.map(g => g.id === gid ? {...g, custom_banner: JSON.stringify(banner)} : g)
+  showOk('gBannerSuccess'); toast('🖼️ Banner grup berhasil diterapkan!')
+}
+
+window.removeGBanner = async () => {
+  const gid = document.getElementById('bannerGroupTarget')?.value
+  if (!gid) { toast('Pilih grup terlebih dahulu'); return }
+  await sb.from('community_groups').update({ custom_banner: null }).eq('id', gid)
+  allGroups = allGroups.map(g => g.id === gid ? {...g, custom_banner: null} : g)
+  toast('Banner grup dihapus')
 }
 
 // ── BOOT ──────────────────────────────────────────────────────
