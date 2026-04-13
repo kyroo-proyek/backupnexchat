@@ -1018,6 +1018,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = "https://bbbwmqbriqmobxekuzca.supabase.co"
 const SUPABASE_KEY = "sb_publishable_zh2AADu4LH6splk2HNp3EA_0s8xMUDP"
+const DEEPSEEK_KEY = "sk-e95480a3f1994dffb27d4fe560b6371a"
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // ── STATE ──────────────────────────────────────────────────────
@@ -2110,7 +2111,8 @@ function subscribeCS(){if(!csTicketId)return;sb.channel('cs-u-'+csTicketId).on('
 window.saveDsKey=()=>{const k=document.getElementById('dsApiKey').value.trim();if(k){localStorage.setItem('nxl_ds_key',k);document.getElementById('botApiInfo').style.display='none'}}
 window.sendBotMsg=async()=>{
   const inp=document.getElementById('botInp'),text=inp.value.trim();if(!text)return
-  const key=localStorage.getItem('nxl_ds_key');if(!key){document.getElementById('botApiInfo').style.display='block';toast('Masukkan DeepSeek API Key dulu');return}
+ const key = DEEPSEEK_KEY || localStorage.getItem('nxl_ds_key')
+if (!key) { document.getElementById('botApiInfo').style.display='block'; toast('Masukkan DeepSeek API Key dulu'); return }
   inp.value='';ar(inp)
   const wrap=document.getElementById('botMsgs');const ud=document.createElement('div');ud.className='bot-msg user';ud.textContent=text;wrap.appendChild(ud)
   const ld=document.createElement('div');ld.className='bot-msg ai loading';ld.innerHTML='<div class="t-dots"><span></span><span></span><span></span></div>';wrap.appendChild(ld);wrap.scrollTop=wrap.scrollHeight
