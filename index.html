@@ -163,9 +163,11 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 .msg-row.out .msg-bubble{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border-bottom-right-radius:4px;box-shadow:0 2px 8px rgba(14,165,233,.25);}
 .msg-row.in .msg-bubble{background:var(--msg-in);color:var(--msg-in-text);border-bottom-left-radius:4px;border:1px solid var(--border);box-shadow:var(--shadow);}
 .msg-bubble.deleted{background:var(--surface2)!important;color:var(--text-muted)!important;font-style:italic;border:1px solid var(--border)!important;box-shadow:none!important;}
-.msg-media{max-width:240px;margin-bottom:5px;}
-.msg-media img{width:100%;border-radius:10px;cursor:pointer;display:block;}
-.msg-media video,.msg-media audio{width:100%;border-radius:10px;display:block;}
+.msg-media{max-width:260px;margin-bottom:5px;border-radius:10px;overflow:hidden;}
+.msg-media img{width:100%;max-height:260px;object-fit:cover;border-radius:10px;cursor:zoom-in;display:block;}
+.msg-media video{width:100%;max-height:280px;border-radius:10px;display:block;background:#000;}
+.msg-media audio{width:100%;border-radius:10px;display:block;}
+.msg-media-save{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.15);border:none;color:inherit;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;}
 .msg-file{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,.12);min-width:180px;cursor:pointer;margin-bottom:4px;}
 .msg-file-icon{font-size:26px;flex-shrink:0;}
 .msg-file-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
@@ -468,9 +470,19 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);padding:9px 18px;border-radius:20px;font-size:13px;z-index:1000;opacity:0;pointer-events:none;transition:.3s;box-shadow:var(--shadow);white-space:nowrap;font-weight:600;}
 .toast.show{opacity:1;}
 /* LIGHTBOX */
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;z-index:999;cursor:zoom-out;}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:10px;}
 .lightbox.open{display:flex;}
-.lightbox img{max-width:92vw;max-height:92vh;border-radius:10px;}
+.lightbox img{max-width:92vw;max-height:85vh;border-radius:10px;object-fit:contain;}
+.lightbox video{max-width:92vw;max-height:85vh;border-radius:10px;}
+/* Custom banner */
+.custom-banner{padding:10px 16px;text-align:center;font-size:12px;font-weight:800;letter-spacing:1.2px;position:relative;overflow:hidden;}
+.custom-banner .cb-icon{display:inline-flex;vertical-align:middle;margin-right:6px;width:18px;height:18px;flex-shrink:0;}
+.custom-banner.fx-shimmer{animation:cb-shimmer 2s ease-in-out infinite;}
+.custom-banner.fx-wave{background-size:200% 200%;animation:cb-wave 3s linear infinite;}
+.custom-banner.fx-pulse{animation:cb-pulse 2s ease-in-out infinite;}
+@keyframes cb-shimmer{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes cb-wave{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+@keyframes cb-pulse{0%,100%{transform:scaleX(1)}50%{transform:scaleX(1.01)}}
 
 /* GROUP DETAIL PAGE in right panel */
 .group-detail-hdr{padding:0;position:relative;}
@@ -618,7 +630,7 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
         <div class="panel-title">💬 Pesan</div>
         <div class="panel-actions">
           <button class="ico-btn" onclick="openFind()" title="Cari Pengguna"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
-          <button class="ico-btn" onclick="toggleMailbox()" title="Mailbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+          <button class="ico-btn" onclick="toggleMailbox()" title="Mailbox" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span id="mailBadge" style="display:none;position:absolute;top:2px;right:2px;background:var(--danger);color:#fff;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;min-width:14px;align-items:center;justify-content:center;"></span></button>
         </div>
       </div>
       <div class="search-bar">
@@ -715,16 +727,27 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
           <div class="rb-body"><div class="rb-author" id="rbAuthor"></div><div class="rb-text" id="rbText"></div></div>
           <span class="rb-x" onclick="clearReply()">✕</span>
         </div>
+        <!-- Pending media preview for private chat -->
+        <div id="pendingPreview" style="display:none;padding:8px 14px;border-top:1px solid var(--border);background:var(--surface2)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div id="pendingThumb" style="width:52px;height:52px;border-radius:8px;overflow:hidden;background:var(--surface3);display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+            <div style="flex:1;min-width:0">
+              <div id="pendingName" style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+              <div id="pendingSize" style="font-size:11px;color:var(--text-muted)"></div>
+            </div>
+            <button onclick="clearPendingFileUI()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--danger);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:12px;font-family:inherit">✕</button>
+          </div>
+        </div>
         <div class="attach-menu" id="attachMenu">
           <div class="att-item" onclick="document.getElementById('fImg').click()">🖼️ Foto</div>
           <div class="att-item" onclick="document.getElementById('fVid').click()">🎬 Video</div>
           <div class="att-item" onclick="document.getElementById('fAud').click()">🎵 Audio</div>
           <div class="att-item" onclick="document.getElementById('fDoc').click()">📄 Dokumen</div>
         </div>
-        <input type="file" id="fImg" accept="image/*" onchange="handleFile(this,'image')">
-        <input type="file" id="fVid" accept="video/*" onchange="handleFile(this,'video')">
-        <input type="file" id="fAud" accept="audio/*" onchange="handleFile(this,'audio')">
-        <input type="file" id="fDoc" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" onchange="handleFile(this,'document')">
+        <input type="file" id="fImg" accept="image/*" onchange="handleFile(this,'image')" style="display:none">
+        <input type="file" id="fVid" accept="video/*" onchange="handleFile(this,'video')" style="display:none">
+        <input type="file" id="fAud" accept="audio/*" onchange="handleFile(this,'audio')" style="display:none">
+        <input type="file" id="fDoc" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" onchange="handleFile(this,'document')" style="display:none">
         <div class="input-row">
           <button class="att-btn" onclick="toggleAttach()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
           <div class="input-box">
@@ -755,7 +778,25 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
           <div class="rb-body"><div class="rb-author" id="gcRbAuthor"></div><div class="rb-text" id="gcRbText"></div></div>
           <span class="rb-x" onclick="clearGcReply()">✕</span>
         </div>
+        <!-- Group pending media preview -->
+        <div id="gcPendingPreview" style="display:none;padding:8px 14px;border-top:1px solid var(--border);background:var(--surface2)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div id="gcPendingThumb" style="width:52px;height:52px;border-radius:8px;overflow:hidden;background:var(--surface3);display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+            <div style="flex:1;min-width:0">
+              <div id="gcPendingName" style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+              <div id="gcPendingSize" style="font-size:11px;color:var(--text-muted)"></div>
+            </div>
+            <button onclick="clearGcPendingFile()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--danger);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:12px;font-family:inherit">✕</button>
+          </div>
+        </div>
+        <div class="attach-menu" id="gcAttachMenu">
+          <div class="att-item" onclick="document.getElementById('gcFImg').click()">🖼️ Foto</div>
+          <div class="att-item" onclick="document.getElementById('gcFVid').click()">🎬 Video</div>
+        </div>
+        <input type="file" id="gcFImg" accept="image/*" onchange="handleGcFile(this,'image')" style="display:none">
+        <input type="file" id="gcFVid" accept="video/*" onchange="handleGcFile(this,'video')" style="display:none">
         <div class="input-row">
+          <button class="att-btn" onclick="toggleGcAttach()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
           <div class="input-box" style="flex:1">
             <textarea class="msg-inp" id="gcInp" placeholder="Ketik pesan ke grup..." rows="1"></textarea>
           </div>
@@ -964,7 +1005,12 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 </div>
 
 <div class="notif-container" id="notifContainer"></div>
-<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img id="lbImg" src=""></div>
+<div class="lightbox" id="lightbox">
+  <button onclick="document.getElementById('lightbox').classList.remove('open')" style="position:absolute;top:16px;right:16px;background:rgba(0,0,0,.5);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>
+  <button id="lbSaveBtn" onclick="saveLbMedia()" style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,.5);border:none;color:#fff;border-radius:20px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;z-index:10"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Simpan</button>
+  <img id="lbImg" src="" style="display:none">
+  <video id="lbVid" controls style="display:none;max-width:90vw;max-height:85vh;border-radius:10px"></video>
+</div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -1026,7 +1072,31 @@ function vBadge(p){
   if(p?.verified_gold) h+=`<span class="vbadge gold"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>`
   return h
 }
+// ── BANNER SVG ICONS ──────────────────────────────────────────
+const BANNER_ICONS={
+  shield:`<svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  star:`<svg class="cb-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  crown:`<svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M4 20l2-8 6 4 6-4 2 8"/><circle cx="4" cy="10" r="1"/><circle cx="12" cy="6" r="1"/><circle cx="20" cy="10" r="1"/></svg>`,
+  diamond:`<svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 9 18 21 6 21 2 9 12 2"/></svg>`,
+  lightning:`<svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  fire:`<svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c-3 4-5 7-3 10.5C9.5 14.5 9 15 9 16c0 1.7 1.3 3 3 3s3-1.3 3-3-2.5-4-3-8z"/><path d="M7 14c-2 1-3 3-3 5h16c0-2-1-4-3-5"/></svg>`,
+  infinity:`<svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c-2-2.5-4-4-6-4a4 4 0 0 0 0 8c2 0 4-1.5 6-4z"/><path d="M12 12c2 2.5 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.5-6 4z"/></svg>`
+}
+function renderCustomBanner(p){
+  if(!p?.custom_banner)return''
+  let b={}
+  try{b=typeof p.custom_banner==='string'?JSON.parse(p.custom_banner):(p.custom_banner||{})}catch(e){}
+  if(!b.text)return''
+  const bg1=b.bg_color||'#0ea5e9',bg2=b.bg_color2||'#0284c7',txtC=b.text_color||'#fff'
+  const icon=b.icon&&b.icon!=='none'?(BANNER_ICONS[b.icon]||''):''
+  const fx=b.effect||'none'
+  const fxClass=fx==='shimmer'?'fx-shimmer':fx==='wave'?'fx-wave':fx==='pulse'?'fx-pulse':''
+  const bgStyle=fx==='wave'?`background:linear-gradient(90deg,${bg1},${bg2},${bg1});background-size:200% 100%;`:`background:linear-gradient(135deg,${bg1},${bg2});`
+  return`<div class="custom-banner ${fxClass}" style="${bgStyle}color:${txtC}">${icon}${esc(b.text)}</div>`
+}
 function vBanner(p){
+  // Custom banner from dev takes priority
+  if(p?.custom_banner)return renderCustomBanner(p)
   if(p?.banner_gold)return`<div class="vbanner gold">✦ AKUN PREMIUM GOLD ✦</div>`
   if(p?.banner_blue)return`<div class="vbanner blue">★ KREATOR TERVERIFIKASI ★</div>`
   return''
@@ -1213,8 +1283,8 @@ function buildMsg(msg){
   let h=`<div class="msg-row ${cls}"><div class="msg-bubble">`
   if(msg.reply_to)h+=`<div class="reply-quote"><div class="rq-author">${isOut?'Kamu':'Pengguna'}</div><div class="rq-text">Pesan dikutip</div></div>`
   if(msg.file_url){
-    if(msg.file_type==='image')h+=`<div class="msg-media"><img src="${msg.file_url}" onclick="openLb('${msg.file_url}')" loading="lazy"></div>`
-    else if(msg.file_type==='video')h+=`<div class="msg-media"><video src="${msg.file_url}" controls></video></div>`
+    if(msg.file_type==='image')h+=`<div class="msg-media"><img src="${msg.file_url}" onclick="openLb('${msg.file_url}','image')" loading="lazy"><button class="msg-media-save" onclick="saveMedia('${msg.file_url}','image')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Simpan</button></div>`
+    else if(msg.file_type==='video')h+=`<div class="msg-media"><video src="${msg.file_url}" controls onclick="event.stopPropagation()"></video><button class="msg-media-save" onclick="openLb('${msg.file_url}','video')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Putar</button><button class="msg-media-save" onclick="saveMedia('${msg.file_url}','video')" style="margin-left:4px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Simpan</button></div>`
     else if(msg.file_type==='audio')h+=`<div class="msg-media"><audio src="${msg.file_url}" controls></audio></div>`
     else h+=`<div class="msg-file" onclick="window.open('${msg.file_url}')"><div class="msg-file-icon">📄</div><div><div class="msg-file-name">${esc(msg.file_name||'File')}</div><div class="msg-file-size">${fmtSz(msg.file_size)}</div></div></div>`
   }
@@ -1235,7 +1305,7 @@ window.sendMsg=async()=>{
   const tempMsg={id:tempId,chat_id:activeChat.chat_id,sender_id:ME.id,content:text||null,file_url:null,file_type:null,file_name:null,file_size:null,deleted:false,edited:false,read_by:[],reply_to:replyTo?.id||null,created_at:new Date().toISOString()}
   renderMsg(tempMsg);scrollB();inp.value='';inp.style.height='auto';clearReply();closeAttach()
   let file_url=null,file_type=null,file_name=null,file_size=null
-  if(pendingFile){const r=await uploadFile(pendingFile.file,pendingFile.type);file_url=r?.url;file_type=pendingFile.type;file_name=pendingFile.file.name;file_size=pendingFile.file.size;clearPendingFile()}
+  if(pendingFile){const r=await uploadFile(pendingFile.file,pendingFile.type);file_url=r?.url;file_type=pendingFile.type;file_name=pendingFile.file.name;file_size=pendingFile.file.size;clearPendingFile();const p=document.getElementById('pendingPreview');if(p)p.style.display='none'}
   const{data:saved}=await sb.from('messages').insert({chat_id:activeChat.chat_id,sender_id:ME.id,content:text||null,file_url,file_type,file_name,file_size,deleted:false,edited:false,reply_to:replyTo?.id||null}).select().single()
   const tempEl=document.getElementById('msg-'+tempId)
   if(tempEl){if(saved){tempEl.id='msg-'+saved.id;tempEl.innerHTML=buildMsg(saved)}else tempEl.remove()}
@@ -1259,7 +1329,26 @@ window.clearReply=()=>{replyTo=null;document.getElementById('replyBar').classLis
 
 // ── FILES ──────────────────────────────────────────────────────
 let pendingFile=null
-window.handleFile=(inp,type)=>{const f=inp.files[0];if(!f)return;pendingFile={file:f,type};toast(`📎 ${f.name} siap`);closeAttach();inp.value=''}
+window.handleFile=(inp,type)=>{
+  const f=inp.files[0];if(!f)return
+  pendingFile={file:f,type}
+  // Show preview
+  const prev=document.getElementById('pendingPreview')
+  const thumb=document.getElementById('pendingThumb')
+  const nameEl=document.getElementById('pendingName')
+  const sizeEl=document.getElementById('pendingSize')
+  if(prev&&thumb&&nameEl&&sizeEl){
+    nameEl.textContent=f.name
+    sizeEl.textContent=fmtSz(f.size)
+    thumb.innerHTML=''
+    if(type==='image'){const img=document.createElement('img');img.style.cssText='width:100%;height:100%;object-fit:cover';img.src=URL.createObjectURL(f);thumb.appendChild(img)}
+    else if(type==='video'){thumb.innerHTML=`<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`}
+    else{thumb.innerHTML=`<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`}
+    prev.style.display='block'
+  }
+  closeAttach();inp.value=''
+}
+window.clearPendingFileUI=()=>{clearPendingFile();const p=document.getElementById('pendingPreview');if(p)p.style.display='none'}
 function clearPendingFile(){pendingFile=null}
 async function uploadFile(file,type){
   const path=`${ME.id}/${Date.now()}-${file.name.replace(/\s/g,'_')}`
@@ -1567,23 +1656,42 @@ async function openGroupChat(g){
   document.getElementById('gcStatus').textContent=(g.member_count||0)+' member'
   // Lock check - only allow sending if not locked or is owner/admin
   const canSend=(g.myRole==='owner'||g.myRole==='admin')||!g.is_locked
-  document.getElementById('gcInputArea').style.display=canSend?'block':'none'
+  document.getElementById('gcInputArea').style.display=canSend?'flex':'none'
+  // Show group custom banner if any
+  let gcBannerEl=document.getElementById('gcCustomBanner')
+  if(!gcBannerEl){gcBannerEl=document.createElement('div');gcBannerEl.id='gcCustomBanner';const gcView=document.getElementById('groupChatView');gcView.insertBefore(gcBannerEl,document.getElementById('gcMsgs'))}
+  if(g.custom_banner){
+    let b={};try{b=typeof g.custom_banner==='string'?JSON.parse(g.custom_banner):(g.custom_banner||{})}catch(e){}
+    if(b.text){
+      const bg1=b.bg_color||'#10b981',bg2=b.bg_color2||'#059669',txtC=b.text_color||'#fff'
+      const icon=b.icon&&b.icon!=='none'?(BANNER_ICONS[b.icon]||''):''
+      const fx=b.effect||'none'
+      const fxClass=fx==='shimmer'?'fx-shimmer':fx==='wave'?'fx-wave':fx==='pulse'?'fx-pulse':''
+      const bgStyle=fx==='wave'?`background:linear-gradient(90deg,${bg1},${bg2},${bg1});background-size:200% 100%;`:`background:linear-gradient(135deg,${bg1},${bg2});`
+      gcBannerEl.innerHTML=`<div class="custom-banner ${fxClass}" style="${bgStyle}color:${txtC}">${icon}${esc(b.text)}</div>`
+    }else gcBannerEl.innerHTML=''
+  }else gcBannerEl.innerHTML=''
   // Load messages
   await loadGroupMsgs(g.id)
   // Subscribe
   if(gcMsgCh)await sb.removeChannel(gcMsgCh)
   gcMsgCh=sb.channel('gc-'+g.id)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'group_messages',filter:`group_id=eq.${g.id}`},async p=>{
-      if(!document.getElementById('gcmsg-'+p.new.id)){
-        // Fetch sender profile for name
-        const{data:sender}=await sb.from('profiles').select('display_name,username').eq('id',p.new.sender_id).maybeSingle()
-        const{data:memberInfo}=await sb.from('group_members').select('role').eq('group_id',g.id).eq('user_id',p.new.sender_id).maybeSingle()
-        renderGroupMsg({...p.new,senderProfile:sender,senderRole:memberInfo?.role||'member'})
+      const m=p.new
+      // Skip own messages (already rendered in sendGroupMsg)
+      if(m.sender_id===ME.id)return
+      if(!document.getElementById('gcmsg-'+m.id)){
+        const[{data:sender},{data:memberInfo}]=await Promise.all([
+          sb.from('profiles').select('display_name,username').eq('id',m.sender_id).maybeSingle(),
+          sb.from('group_members').select('role').eq('group_id',g.id).eq('user_id',m.sender_id).maybeSingle()
+        ])
+        renderGroupMsg({...m,senderProfile:sender,senderRole:memberInfo?.role||'member'})
         scrollGc()
       }
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'group_messages',filter:`group_id=eq.${g.id}`},p=>{
-      const el=document.getElementById('gcmsg-'+p.new.id);if(el)el.innerHTML=buildGroupMsg(p.new,p.new.senderProfile,p.new.senderRole)
+      const el=document.getElementById('gcmsg-'+p.new.id)
+      if(el){const existing=el;existing.innerHTML=buildGroupMsg(p.new,p.new.senderProfile,p.new.senderRole)}
     })
     .on('broadcast',{event:'typing'},p=>{
       if(p.payload?.from!==ME.id){document.getElementById('gcTypingName').textContent=(p.payload?.name||'Seseorang')+' mengetik...';document.getElementById('gcTypingBar').classList.add('show');clearTimeout(gcTypingTimer);gcTypingTimer=setTimeout(()=>document.getElementById('gcTypingBar').classList.remove('show'),3000)}
@@ -1591,13 +1699,8 @@ async function openGroupChat(g){
 }
 
 async function loadGroupMsgs(groupId){
-  const{data}=await sb.from('group_messages').select('*,senderProfile:profiles!group_messages_sender_id_fkey(display_name,username),senderMember:group_members!inner(role)').eq('group_id',groupId).eq('senderMember.group_id',groupId).order('created_at',{ascending:true})
-  // Fallback: load without join if schema mismatch
-  let msgs=data
-  if(!msgs){
-    const{data:d2}=await sb.from('group_messages').select('*').eq('group_id',groupId).order('created_at',{ascending:true})
-    msgs=d2||[]
-  }
+  // Use simple query - avoid complex joins that may fail
+  const{data:msgs}=await sb.from('group_messages').select('*').eq('group_id',groupId).order('created_at',{ascending:true})
   const wrap=document.getElementById('gcMsgs');wrap.innerHTML=''
   let lastD=''
   // Get member roles map
@@ -1634,6 +1737,10 @@ function buildGroupMsg(msg,sender,role){
   if(!isOut)h+=`<div class="msg-sender-name ${roleClass}">${esc(senderName)} ${roleBadge}</div>`
   h+=`<div class="msg-bubble">`
   if(msg.reply_to)h+=`<div class="reply-quote"><div class="rq-author">${esc(senderName)}</div><div class="rq-text">Pesan dikutip</div></div>`
+  if(msg.file_url){
+    if(msg.file_type==='image')h+=`<div class="msg-media"><img src="${msg.file_url}" onclick="openLb('${msg.file_url}','image')" loading="lazy"><button class="msg-media-save" onclick="saveMedia('${msg.file_url}','image')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Simpan</button></div>`
+    else if(msg.file_type==='video')h+=`<div class="msg-media"><video src="${msg.file_url}" controls onclick="event.stopPropagation()"></video><button class="msg-media-save" onclick="saveMedia('${msg.file_url}','video')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Simpan</button></div>`
+  }
   if(msg.content)h+=esc(msg.content)
   h+=`<div class="msg-footer"><span class="msg-time">${fmt(msg.created_at)}</span></div></div>`
   // Actions: owner/admin can delete any msg; sender can delete own
@@ -1646,24 +1753,54 @@ function buildGroupMsg(msg,sender,role){
 
 window.sendGroupMsg=async()=>{
   if(!activeGroup)return
-  const inp=document.getElementById('gcInp'),text=inp.value.trim();if(!text)return
+  const inp=document.getElementById('gcInp'),text=inp.value.trim()
+  if(!text&&!gcPendingFile)return
   inp.value='';inp.style.height='auto'
-  const{data:saved}=await sb.from('group_messages').insert({group_id:activeGroup.id,sender_id:ME.id,content:text,reply_to:gcReplyTo?.id||null,deleted:false}).select().single()
+  let file_url=null,file_type=null,file_name=null,file_size=null
+  if(gcPendingFile){
+    const r=await uploadFile(gcPendingFile.file,gcPendingFile.type)
+    file_url=r?.url;file_type=gcPendingFile.type;file_name=gcPendingFile.file.name;file_size=gcPendingFile.file.size
+    clearGcPendingFile()
+  }
+  const{data:saved}=await sb.from('group_messages').insert({group_id:activeGroup.id,sender_id:ME.id,content:text||null,file_url,file_type,file_name,file_size,reply_to:gcReplyTo?.id||null,deleted:false}).select().single()
   clearGcReply()
   if(saved){
     const{data:sender}=await sb.from('profiles').select('display_name,username').eq('id',ME.id).maybeSingle()
-    renderGroupMsg({...saved,senderProfile:sender,senderRole:activeGroup.myRole});scrollGc()
+    // Remove duplicate guard: always render own sent message immediately
+    const existing=document.getElementById('gcmsg-'+saved.id)
+    if(!existing)renderGroupMsg({...saved,senderProfile:sender||{display_name:ME.display_name,username:ME.username},senderRole:activeGroup.myRole})
+    scrollGc()
   }
   // Update group last message
-  await sb.from('community_groups').update({last_message:text,last_message_at:new Date().toISOString()}).eq('id',activeGroup.id)
-  // Broadcast typing stop
-  if(gcMsgCh)gcMsgCh.send({type:'broadcast',event:'typing',payload:{from:ME.id,name:ME.display_name}})
+  await sb.from('community_groups').update({last_message:text||`[${file_type||'media'}]`,last_message_at:new Date().toISOString()}).eq('id',activeGroup.id)
 }
 
 const gcInp=document.getElementById('gcInp')
 gcInp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendGroupMsg()}})
 gcInp.addEventListener('input',e=>{ar(e.target);if(gcMsgCh&&activeGroup)gcMsgCh.send({type:'broadcast',event:'typing',payload:{from:ME.id,name:ME.display_name}})})
 
+// Group file attach
+let gcPendingFile=null
+window.handleGcFile=(inp,type)=>{
+  const f=inp.files[0];if(!f)return
+  gcPendingFile={file:f,type}
+  const prev=document.getElementById('gcPendingPreview')
+  const thumb=document.getElementById('gcPendingThumb')
+  const nameEl=document.getElementById('gcPendingName')
+  const sizeEl=document.getElementById('gcPendingSize')
+  if(prev&&thumb){
+    nameEl.textContent=f.name;sizeEl.textContent=fmtSz(f.size)
+    thumb.innerHTML=''
+    if(type==='image'){const img=document.createElement('img');img.style.cssText='width:100%;height:100%;object-fit:cover';img.src=URL.createObjectURL(f);thumb.appendChild(img)}
+    else{thumb.innerHTML=`<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`}
+    prev.style.display='block'
+  }
+  closeGcAttach();inp.value=''
+}
+window.clearGcPendingFile=()=>{gcPendingFile=null;const p=document.getElementById('gcPendingPreview');if(p)p.style.display='none'}
+window.toggleGcAttach=()=>document.getElementById('gcAttachMenu').classList.toggle('open')
+function closeGcAttach(){const m=document.getElementById('gcAttachMenu');if(m)m.classList.remove('open')}
+document.addEventListener('click',e=>{if(!e.target.closest('#gcInputArea .att-btn')&&!e.target.closest('#gcAttachMenu'))closeGcAttach()})
 window.delGroupMsg=async id=>{if(!confirm('Hapus pesan ini?'))return;await sb.from('group_messages').update({deleted:true,content:null}).eq('id',id)}
 window.setGcReply=(id,text,author)=>{gcReplyTo={id,text,author};document.getElementById('gcRbAuthor').textContent=author||'Pesan';document.getElementById('gcRbText').textContent=text;document.getElementById('gcReplyBar').classList.add('show');document.getElementById('gcInp').focus()}
 window.clearGcReply=()=>{gcReplyTo=null;document.getElementById('gcReplyBar').classList.remove('show')}
@@ -1906,22 +2043,51 @@ async function markNotifRead(id){await sb.from('notifications').update({read:tru
 window.markAllNotifsRead=async()=>{await sb.from('notifications').update({read:true}).eq('user_id',ME.id);notifs=notifs.map(n=>({...n,read:true}));renderNotifList();document.getElementById('notifDot').classList.remove('show')}
 
 // ── MAILBOX ────────────────────────────────────────────────────
-async function loadMailbox(){const{data}=await sb.from('mailbox').select('*').or(`user_id.eq.${ME.id},user_id.is.null`).order('created_at',{ascending:false});renderMailboxPopup(data||[])}
+async function loadMailbox(){
+  // Fetch user-specific mails
+  const{data:userMails}=await sb.from('mailbox').select('*').eq('user_id',ME.id).order('created_at',{ascending:false})
+  // Fetch broadcast mails (no specific user)
+  const{data:broadMails}=await sb.from('mailbox').select('*').is('user_id',null).order('created_at',{ascending:false})
+  const all=[...(userMails||[]),...(broadMails||[])]
+  // Sort by created_at descending
+  all.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
+  renderMailboxPopup(all)
+  // Update mail badge
+  const unread=all.filter(m=>!mailboxRead.has(m.id)).length
+  const badge=document.getElementById('mailBadge')
+  if(badge){badge.style.display=unread>0?'flex':'none';badge.textContent=unread>9?'9+':unread}
+}
 function renderMailboxPopup(mails){
   const body=document.getElementById('mpBody')
+  if(!body)return
   if(!mails.length){body.innerHTML='<div class="mail-empty">Tidak ada pesan</div>';return}
   body.innerHTML=''
   mails.forEach(m=>{
     const isR=mailboxRead.has(m.id)
     const div=document.createElement('div');div.className='mail-item '+(isR?'read':'unread');div.onclick=()=>toggleMail(div,m)
-    div.innerHTML=`<div class="mail-item-title"><div class="mail-dot"></div>${esc(m.title)}</div>
-      <div class="mail-preview">${esc(m.content||'').substring(0,50)}...</div>
-      <div class="mail-time-txt">${new Date(m.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short'})}</div>
-      <div class="mail-detail" id="md-${m.id}"><div class="mail-d-title">${esc(m.title)}</div><div class="mail-d-content">${esc(m.content||'')}</div>${m.link?`<a class="mail-d-link" href="${esc(m.link)}" target="_blank">🔗 Buka Link</a>`:''}</div>`
+    div.innerHTML=`<div class="mail-item-title"><div class="mail-dot"></div>${esc(m.title||'Pesan')}</div>
+      <div class="mail-preview">${esc((m.content||'').substring(0,60))}${(m.content||'').length>60?'...':''}</div>
+      <div class="mail-time-txt">${new Date(m.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}</div>
+      <div class="mail-detail" id="md-${m.id}"><div class="mail-d-title">${esc(m.title||'')}</div><div class="mail-d-content">${esc(m.content||'')}</div>${m.link?`<a class="mail-d-link" href="${esc(m.link)}" target="_blank">🔗 Buka Link</a>`:''}</div>`
     body.appendChild(div)
   })
 }
-function toggleMail(el,m){const det=document.getElementById('md-'+m.id);if(!det)return;const was=det.classList.contains('show');document.querySelectorAll('.mail-detail.show').forEach(d=>d.classList.remove('show'));if(!was){det.classList.add('show');if(!mailboxRead.has(m.id)){mailboxRead.add(m.id);localStorage.setItem('nxl_read',JSON.stringify([...mailboxRead]));el.classList.remove('unread');el.classList.add('read')}}}
+function toggleMail(el,m){
+  const det=document.getElementById('md-'+m.id);if(!det)return
+  const was=det.classList.contains('show')
+  document.querySelectorAll('.mail-detail.show').forEach(d=>d.classList.remove('show'))
+  if(!was){
+    det.classList.add('show')
+    if(!mailboxRead.has(m.id)){
+      mailboxRead.add(m.id)
+      localStorage.setItem('nxl_read',JSON.stringify([...mailboxRead]))
+      el.classList.remove('unread');el.classList.add('read')
+      // Update badge
+      const badge=document.getElementById('mailBadge')
+      if(badge){const c=parseInt(badge.textContent||'0')-1;badge.style.display=c>0?'flex':'none';badge.textContent=c>0?c:''}
+    }
+  }
+}
 window.toggleMailbox=()=>document.getElementById('mailboxPopup').classList.toggle('open')
 
 // ── CS ─────────────────────────────────────────────────────────
@@ -2024,7 +2190,30 @@ function updateTabBadge(){const total=Object.values(unreadCounts).reduce((a,b)=>
 // ── MODAL ──────────────────────────────────────────────────────
 window.openModal=id=>document.getElementById(id).classList.add('open')
 window.closeModal=id=>document.getElementById(id).classList.remove('open')
-window.openLb=url=>{document.getElementById('lbImg').src=url;document.getElementById('lightbox').classList.add('open')}
+window.openLb=(url,type)=>{
+  const lb=document.getElementById('lightbox')
+  const img=document.getElementById('lbImg')
+  const vid=document.getElementById('lbVid')
+  lb._currentUrl=url;lb._currentType=type||'image'
+  if(type==='video'){img.style.display='none';img.src='';vid.style.display='block';vid.src=url}
+  else{vid.style.display='none';vid.src='';img.style.display='block';img.src=url}
+  lb.classList.add('open')
+}
+window.saveLbMedia=()=>{
+  const lb=document.getElementById('lightbox')
+  if(lb._currentUrl)saveMedia(lb._currentUrl,lb._currentType||'image')
+}
+window.saveMedia=async(url,type)=>{
+  try{
+    const a=document.createElement('a')
+    const response=await fetch(url)
+    const blob=await response.blob()
+    a.href=URL.createObjectURL(blob)
+    a.download=`nexlink_${Date.now()}.${type==='video'?'mp4':'jpg'}`
+    a.click();URL.revokeObjectURL(a.href)
+    toast('✅ Media tersimpan!')
+  }catch(e){window.open(url,'_blank');toast('Buka di tab baru untuk menyimpan')}
+}
 
 // ── BOOT ───────────────────────────────────────────────────────
 init()
