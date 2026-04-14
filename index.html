@@ -511,6 +511,10 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 .gd-tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent;transition:.15s;}
 .gd-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
+/* VERIFY POPUP */
+#verifyPopup{display:none;}
+#verifyPopup.open{display:flex;}
+
 @media(max-width:900px){.right-panel{width:100%;position:fixed;inset:0;z-index:60;}.left-sidebar{width:60px;}.main-panel{width:280px;}}
 @media(max-width:640px){.main-panel{display:none;}.main-panel.mob-show{display:flex;width:100%;position:fixed;inset:0;z-index:50;}.chat-area{display:none;}.chat-area.mob-show{display:flex;position:fixed;inset:0;z-index:40;}.left-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;height:60px;flex-direction:row;justify-content:space-around;padding:0;border-right:none;border-top:1px solid var(--border);z-index:80;}.ls-btn-label{display:none;}.ls-logo,.ls-divider,.ls-spacer,.ls-avatar{display:none;}.mailbox-popup{left:8px;right:8px;width:auto;}.cs-panel{left:8px;right:8px;width:auto;}}
 </style>
@@ -540,19 +544,45 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
         <div class="auth-tab active" id="tabL" onclick="switchTab('login')">Masuk</div>
         <div class="auth-tab" id="tabR" onclick="switchTab('register')">Daftar</div>
       </div>
-      <div id="regFields">
-        <div class="form-group"><label class="form-lbl">Nama Lengkap</label><input class="a-inp" id="regName" placeholder="Nama kamu"></div>
+      <!-- REGISTER FIELDS -->
+      <div id="regFields" style="display:none;flex-direction:column">
+        <div class="form-group"><label class="form-lbl">Nama Lengkap</label><input class="a-inp" id="regName" placeholder="Nama lengkap kamu"></div>
         <div class="form-group"><label class="form-lbl">Username</label><input class="a-inp" id="regUser" placeholder="username (min 3 karakter)"></div>
       </div>
-      <div class="form-group">
-        <label class="form-lbl">Nomor Telepon</label>
-        <div class="phone-row"><input class="cc-sel" id="cc" value="+62"><input class="a-inp" id="phone" type="tel" placeholder="81234567890" style="flex:1"></div>
+      <!-- SHARED FIELDS -->
+      <div class="form-group"><label class="form-lbl">Email</label><input class="a-inp" id="emailInp" type="email" placeholder="contoh@email.com"></div>
+      <!-- Login only: verification code -->
+      <div class="form-group" id="verifyCodeField" style="display:none">
+        <label class="form-lbl">Kode Verifikasi</label>
+        <input class="a-inp" id="verifyCode" type="text" placeholder="Kode 6 digit dari email" maxlength="6" style="letter-spacing:4px;text-align:center;font-size:18px;font-weight:700">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:5px;text-align:center">Cek inbox atau folder spam emailmu</div>
       </div>
-      <div class="form-group"><label class="form-lbl">Password</label><input class="a-inp" id="pass" type="password" placeholder="Min 6 karakter"></div>
+      <div class="form-group"><label class="form-lbl">Password</label>
+        <div style="position:relative">
+          <input class="a-inp" id="pass" type="password" placeholder="Min 6 karakter" style="padding-right:42px">
+          <button type="button" onclick="togglePassVis('pass',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">👁</button>
+        </div>
+      </div>
       <div id="authErrBox" style="display:none" class="auth-err">⚠️ <span id="authErrMsg"></span></div>
       <button class="auth-btn" id="authBtn" onclick="handleAuth()">Masuk</button>
+      <div id="resendRow" style="display:none;text-align:center;margin-top:8px">
+        <span style="font-size:12px;color:var(--text-muted)">Tidak dapat kode? </span>
+        <button onclick="resendVerification()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Kirim Ulang</button>
+      </div>
       <div class="auth-terms">Dengan melanjutkan kamu menyetujui <a href="#">Syarat & Ketentuan</a> kami</div>
     </div>
+  </div>
+</div>
+
+<!-- VERIFY EMAIL POPUP -->
+<div id="verifyPopup" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border-radius:20px;padding:28px 24px;max-width:360px;width:100%;text-align:center;border:1px solid var(--border);box-shadow:var(--shadow-lg);position:relative">
+    <button onclick="closeVerifyPopup()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);line-height:1">✕</button>
+    <div style="font-size:48px;margin-bottom:12px">📧</div>
+    <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">Cek Emailmu!</div>
+    <div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px">Kode verifikasi telah dikirim ke<br><strong id="verifyEmailDisplay" style="color:var(--accent)"></strong><br><br>Masukkan kode tersebut di form login untuk mengaktifkan akun.</div>
+    <div style="background:var(--surface2);border-radius:12px;padding:12px;font-size:12px;color:var(--text-muted);margin-bottom:16px">💡 Jika tidak ada di inbox, cek folder <strong>Spam / Promotions</strong></div>
+    <button onclick="closeVerifyPopup()" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Mengerti, Lanjut Login</button>
   </div>
 </div>
 
@@ -1018,7 +1048,6 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = "https://bbbwmqbriqmobxekuzca.supabase.co"
 const SUPABASE_KEY = "sb_publishable_zh2AADu4LH6splk2HNp3EA_0s8xMUDP"
-const DEEPSEEK_KEY = "sk-e95480a3f1994dffb27d4fe560b6371a"
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // ── STATE ──────────────────────────────────────────────────────
@@ -1109,38 +1138,95 @@ window.toggleTheme=()=>{const c=document.documentElement.getAttribute('data-them
 function updateThemeIcon(t){const i=document.getElementById('themeIcon');if(!i)return;i.innerHTML=t==='dark'?'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>':'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';const tai=document.getElementById('themeToggleAuth');if(tai)tai.textContent=t==='dark'?'☀️':'🌙'}
 
 // ── AUTH TABS ──────────────────────────────────────────────────
-window.switchTab=mode=>{const iL=mode==='login';document.getElementById('tabL').classList.toggle('active',iL);document.getElementById('tabR').classList.toggle('active',!iL);document.getElementById('regFields').style.display=iL?'none':'flex';document.getElementById('authBtn').textContent=iL?'Masuk':'Daftar'}
+window.switchTab=mode=>{
+  const iL=mode==='login'
+  document.getElementById('tabL').classList.toggle('active',iL)
+  document.getElementById('tabR').classList.toggle('active',!iL)
+  document.getElementById('regFields').style.display=iL?'none':'flex'
+  document.getElementById('authBtn').textContent=iL?'Masuk':'Daftar'
+  document.getElementById('verifyCodeField').style.display='none'
+  document.getElementById('resendRow').style.display='none'
+  hideAuthErr()
+  // Kalau baru pindah ke login setelah register, tampilkan kolom kode verifikasi
+  if(iL&&window._justRegistered){
+    document.getElementById('verifyCodeField').style.display='block'
+    document.getElementById('resendRow').style.display='block'
+    window._justRegistered=false
+  }
+}
 function showAuthErr(m){const b=document.getElementById('authErrBox'),e=document.getElementById('authErrMsg');if(b&&e){b.style.display='flex';e.textContent=m}}
 function hideAuthErr(){const b=document.getElementById('authErrBox');if(b)b.style.display='none'}
 
+window.togglePassVis=(id,btn)=>{const el=document.getElementById(id);if(!el)return;el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🙈'}
+
 window.handleAuth=async()=>{
-  const btn=document.getElementById('authBtn'),rawPhone=document.getElementById('phone').value.trim()
-  const code=document.getElementById('cc').value.trim(),pass=document.getElementById('pass').value
-  hideAuthErr();if(!rawPhone){showAuthErr('Masukkan nomor telepon');return}
+  const btn=document.getElementById('authBtn')
+  const emailRaw=document.getElementById('emailInp').value.trim().toLowerCase()
+  const pass=document.getElementById('pass').value
+  hideAuthErr()
+  if(!emailRaw){showAuthErr('Masukkan email');return}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)){showAuthErr('Format email tidak valid');return}
   if(!pass||pass.length<6){showAuthErr('Password minimal 6 karakter');return}
-  const phone=code+rawPhone.replace(/^0+/,''),email=phone.replace(/\+/g,'')+'@nexlink.app'
   const isL=document.getElementById('tabL').classList.contains('active')
   btn.disabled=true;btn.textContent='⏳ Memproses...'
   try{
-    if(isL){const{data,error}=await sb.auth.signInWithPassword({email,password:pass});if(error){showAuthErr('Nomor atau password salah');return}await loadProfile(data.user.id)}
-    else{
-      const name=document.getElementById('regName').value.trim(),uname=document.getElementById('regUser').value.trim().replace('@','').replace(/\s/g,'').toLowerCase()
+    if(isL){
+      // ── LOGIN dengan email + password ──
+      const verifyCodeVal=document.getElementById('verifyCode').value.trim()
+      const{data,error}=await sb.auth.signInWithPassword({email:emailRaw,password:pass})
+      if(error){
+        if(error.message.toLowerCase().includes('email not confirmed')){
+          // Belum verify → tampilkan field kode OTP
+          document.getElementById('verifyCodeField').style.display='block'
+          document.getElementById('resendRow').style.display='block'
+          showAuthErr('Email belum diverifikasi. Masukkan kode dari email kamu.')
+        }else{
+          showAuthErr('Email atau password salah')
+        }
+        return
+      }
+      await loadProfile(data.user.id)
+    }else{
+      // ── REGISTER dengan email ──
+      const name=document.getElementById('regName').value.trim()
+      const uname=document.getElementById('regUser').value.trim().replace('@','').replace(/\s/g,'').toLowerCase()
       if(!name){showAuthErr('Masukkan nama lengkap');return}
       if(!uname||uname.length<3){showAuthErr('Username minimal 3 karakter');return}
       if(!/^[a-z0-9_]+$/.test(uname)){showAuthErr('Username hanya huruf kecil, angka, underscore');return}
-      const[{data:ep},{data:eu}]=await Promise.all([sb.from('profiles').select('id').eq('phone',phone).maybeSingle(),sb.from('profiles').select('id').eq('username',uname).maybeSingle()])
-      if(ep){showAuthErr('Nomor sudah terdaftar');return}
+      // Cek username duplicate dulu
+      const{data:eu}=await sb.from('profiles').select('id').eq('username',uname).maybeSingle()
       if(eu){showAuthErr('Username sudah dipakai');return}
-      const{data,error}=await sb.auth.signUp({email,password:pass})
+      // Daftarkan ke supabase auth
+      const{data,error}=await sb.auth.signUp({email:emailRaw,password:pass,options:{data:{display_name:name,username:uname}}})
       if(error){showAuthErr(error.message);return}
-      await sb.from('profiles').upsert({id:data.user.id,phone,username:uname,display_name:name,bio:'',role:'user',banned:false,flagged:false,badges:'[]'})
-      await loadProfile(data.user.id)
+      if(data?.user){
+        // Buat profile — phone bisa null (hanya developer yang isi phone)
+        await sb.from('profiles').upsert({id:data.user.id,phone:null,username:uname,display_name:name,bio:'',role:'user',banned:false,flagged:false,badges:'[]'})
+      }
+      // Tampilkan popup verifikasi email
+      document.getElementById('verifyEmailDisplay').textContent=emailRaw
+      document.getElementById('verifyPopup').style.display='flex'
+      window._justRegistered=true
+      window._registeredEmail=emailRaw
+      // Switch ke tab login
+      switchTab('login')
+      document.getElementById('emailInp').value=emailRaw
     }
   }catch(e){showAuthErr('Terjadi kesalahan: '+e.message)}
   finally{btn.disabled=false;btn.textContent=isL?'Masuk':'Daftar'}
 }
 
-;['phone','pass','regName','regUser'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')handleAuth()})})
+window.closeVerifyPopup=()=>{document.getElementById('verifyPopup').style.display='none'}
+
+window.resendVerification=async()=>{
+  const email=document.getElementById('emailInp').value.trim().toLowerCase()
+  if(!email){toast('Isi email dulu');return}
+  const{error}=await sb.auth.resend({type:'signup',email})
+  if(error){toast('❌ Gagal kirim ulang: '+error.message)}
+  else{toast('📧 Kode baru dikirim ke '+email)}
+}
+
+;['emailInp','pass','regName','regUser'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')handleAuth()})})
 
 async function init(){initTheme();const{data:{session}}=await sb.auth.getSession();if(session)await loadProfile(session.user.id)}
 
@@ -1484,7 +1570,7 @@ window.openRightPanel=async type=>{
         <div class="rp-av" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff">${p.avatar_url?`<img src="${p.avatar_url}">`:((name[0]||'?').toUpperCase())}</div>
         <div class="rp-name ${p.flagged?'flag-name':''}">${esc(name)}${vBadge(p)}</div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:4px">${renderBadges(p)}</div>
-        <div class="rp-phone ${p.flagged?'flag-phone':''}">${esc(p.phone||'')}</div>
+        <div class="rp-phone ${p.flagged?'flag-phone':''}">${p.role==='developer'&&p.phone?esc(p.phone):''}</div>
         <div class="rp-bio">${esc(p.bio||'')}</div>
         <button class="follow-btn ${fl?'following':''}" onclick="toggleFollow('${u.id}',${!!fl})">${fl?'✓ Mengikuti':'+ Ikuti'}</button>
         <button class="like-btn ${lk?'liked':''}" onclick="toggleLike('${u.id}',${!!lk})">❤️ ${p.likes_count||0} Suka</button>
@@ -1927,6 +2013,7 @@ async function renderMyProfile(){
   const{data:fresh}=await sb.from('profiles').select('*').eq('id',ME.id).maybeSingle()
   if(fresh)ME={...ME,...fresh}
   const pg=document.getElementById('myProfilePage')
+  const isDev=ME.role==='developer'
   pg.innerHTML=`
     <div class="profile-cover"></div>
     <div style="position:relative">
@@ -1939,7 +2026,7 @@ async function renderMyProfile(){
       ${vBanner(ME)}
       <div class="profile-username">${esc(ME.display_name||ME.username)}${vBadge(ME)}</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${renderBadges(ME)}</div>
-      <div class="profile-handle">@${esc(ME.username||'')} • ${esc(ME.phone||'')}</div>
+      <div class="profile-handle">@${esc(ME.username||'')}${isDev&&ME.phone?' • '+esc(ME.phone):''}</div>
       <div class="profile-bio">${esc(ME.bio||'Belum ada bio')}</div>
       <div class="profile-stats">
         <div class="ps-item"><div class="ps-val">${ME.followers_count||0}</div><div class="ps-lbl">Pengikut</div></div>
@@ -1947,6 +2034,10 @@ async function renderMyProfile(){
       </div>
       <div class="profile-actions">
         <button class="profile-btn edit-prof" onclick="openRightPanel('editProfile')">✏️ Edit Profil</button>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+        <button onclick="openResetPassword()" style="width:100%;padding:10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;justify-content:center">🔒 Reset Password</button>
+        <button onclick="openChangeEmail()" style="width:100%;padding:10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;justify-content:center">✉️ Ubah Email</button>
       </div>
     </div>`
 }
@@ -1959,6 +2050,76 @@ window.saveProfile=async()=>{
   await sb.from('profiles').update({display_name:name,username:uname,bio:bio||''}).eq('id',ME.id)
   ME.display_name=name;ME.username=uname;ME.bio=bio||''
   updateLsAvatar();renderMyProfile();toast('✅ Profil disimpan')
+}
+
+// ── RESET PASSWORD ──────────────────────────────────────────────
+window.openResetPassword=()=>{
+  const rp=document.getElementById('rightPanel');rp.classList.add('open')
+  document.getElementById('rpTitle').textContent='Reset Password'
+  document.getElementById('rpContent').innerHTML=`
+    <div class="rp-section">
+      <div class="rp-section-title">Password Baru</div>
+      <div class="form-group">
+        <label class="form-lbl">Password Baru</label>
+        <div style="position:relative">
+          <input class="rp-inp" id="newPass1" type="password" placeholder="Min 6 karakter" style="padding-right:40px">
+          <button type="button" onclick="togglePassVis('newPass1',this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted)">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">Konfirmasi Password</label>
+        <div style="position:relative">
+          <input class="rp-inp" id="newPass2" type="password" placeholder="Ulangi password" style="padding-right:40px">
+          <button type="button" onclick="togglePassVis('newPass2',this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted)">👁</button>
+        </div>
+      </div>
+      <button class="rp-save" onclick="doResetPassword()">Simpan Password Baru</button>
+    </div>
+    <div class="rp-section" style="margin-top:8px">
+      <div class="rp-section-title">Atau Kirim Link Reset via Email</div>
+      <button onclick="sendResetEmail()" style="width:100%;padding:10px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📧 Kirim Email Reset</button>
+    </div>`
+}
+
+window.doResetPassword=async()=>{
+  const p1=document.getElementById('newPass1')?.value,p2=document.getElementById('newPass2')?.value
+  if(!p1||p1.length<6){toast('Password minimal 6 karakter');return}
+  if(p1!==p2){toast('Password tidak cocok');return}
+  const{error}=await sb.auth.updateUser({password:p1})
+  if(error){toast('❌ '+error.message)}
+  else{toast('✅ Password berhasil diperbarui');closeRightPanel()}
+}
+
+window.sendResetEmail=async()=>{
+  const{data:{user}}=await sb.auth.getUser()
+  if(!user?.email){toast('Email tidak ditemukan');return}
+  const{error}=await sb.auth.resetPasswordForEmail(user.email)
+  if(error){toast('❌ '+error.message)}
+  else{toast('📧 Link reset dikirim ke '+user.email);closeRightPanel()}
+}
+
+// ── UBAH EMAIL ──────────────────────────────────────────────────
+window.openChangeEmail=()=>{
+  const rp=document.getElementById('rightPanel');rp.classList.add('open')
+  document.getElementById('rpTitle').textContent='Ubah Email'
+  document.getElementById('rpContent').innerHTML=`
+    <div class="rp-section">
+      <div class="rp-section-title">Email Baru</div>
+      <div class="form-group">
+        <label class="form-lbl">Email Baru</label>
+        <input class="rp-inp" id="newEmail" type="email" placeholder="email@baru.com">
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;line-height:1.5">⚠️ Kamu akan menerima email konfirmasi di alamat baru. Pastikan email valid.</div>
+      <button class="rp-save" onclick="doChangeEmail()">Ubah Email</button>
+    </div>`
+}
+
+window.doChangeEmail=async()=>{
+  const em=document.getElementById('newEmail')?.value.trim().toLowerCase()
+  if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){toast('Format email tidak valid');return}
+  const{error}=await sb.auth.updateUser({email:em})
+  if(error){toast('❌ '+error.message)}
+  else{toast('📧 Konfirmasi dikirim ke '+em+'. Cek email!');closeRightPanel()}
 }
 window.uploadAvatar=async inp=>{const f=inp.files[0];if(!f)return;const path=`avatars/${ME.id}/${Date.now()}.${f.name.split('.').pop()}`;const{error}=await sb.storage.from('nxl-avatars').upload(path,f,{upsert:true});if(error){toast('Upload gagal');return};const url=sb.storage.from('nxl-avatars').getPublicUrl(path).data.publicUrl;await sb.from('profiles').update({avatar_url:url}).eq('id',ME.id);ME.avatar_url=url;updateLsAvatar();renderMyProfile();toast('✅ Foto diperbarui')}
 window.logout=async()=>{await sb.auth.signOut();location.reload()}
@@ -2016,13 +2177,36 @@ window.openChannel=async chId=>{
   document.getElementById('groupChatView').style.display='none'
   document.getElementById('cvName').textContent=ch.name;document.getElementById('cvSubs').textContent=(ch.subscriber_count||0)+' pengikut'
   document.getElementById('cvInputArea').style.display=ch.owner_id===ME.id?'block':'none'
+  // Load messages
   const{data}=await sb.from('channel_messages').select('*').eq('channel_id',chId).order('created_at',{ascending:true})
   const wrap=document.getElementById('cvMsgs');wrap.innerHTML=''
-  ;(data||[]).forEach(m=>{const d=document.createElement('div');d.className='msg-row in';d.innerHTML=`<div class="msg-bubble">${esc(m.content||'')}<div class="msg-footer"><span class="msg-time">${fmt(m.created_at)}</span></div></div>`;wrap.appendChild(d)})
+  ;(data||[]).forEach(m=>appendChannelMsg(wrap,m))
   wrap.scrollTop=wrap.scrollHeight
+  // Subscribe realtime
+  if(window._chMsgSub)sb.removeChannel(window._chMsgSub)
+  window._chMsgSub=sb.channel('ch-'+chId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'channel_messages',filter:`channel_id=eq.${chId}`},p=>{
+      const w=document.getElementById('cvMsgs');if(w){appendChannelMsg(w,p.new);w.scrollTop=w.scrollHeight}
+    }).subscribe()
 }
-window.closeChannelView=()=>{activeChannel=null;document.getElementById('channelView').style.display='none';document.getElementById('chatEmpty').style.display='flex'}
-window.sendChannelMsg=async()=>{if(!activeChannel)return;const inp=document.getElementById('cvInp'),t=inp.value.trim();if(!t)return;await sb.from('channel_messages').insert({channel_id:activeChannel.id,sender_id:ME.id,content:t});inp.value=''}
+function appendChannelMsg(wrap,m){
+  const d=document.createElement('div');d.className='msg-row in'
+  d.innerHTML=`<div class="msg-bubble">${esc(m.content||'')}${m.file_url?`<div class="msg-media"><img src="${m.file_url}" onclick="openLb('${m.file_url}','image')" loading="lazy"></div>`:''}
+    <div class="msg-footer"><span class="msg-time">${fmt(m.created_at)}</span></div></div>`
+  wrap.appendChild(d)
+}
+window.closeChannelView=()=>{
+  if(window._chMsgSub){sb.removeChannel(window._chMsgSub);window._chMsgSub=null}
+  activeChannel=null;document.getElementById('channelView').style.display='none';document.getElementById('chatEmpty').style.display='flex'
+}
+window.sendChannelMsg=async()=>{
+  if(!activeChannel)return
+  const inp=document.getElementById('cvInp'),t=inp.value.trim()
+  if(!t)return
+  inp.value=''
+  const{error}=await sb.from('channel_messages').insert({channel_id:activeChannel.id,sender_id:ME.id,content:t})
+  if(error){toast('❌ Gagal kirim pesan: '+error.message);inp.value=t}
+}
 document.getElementById('cvInp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChannelMsg()}})
 window.createChannel=async()=>{const name=document.getElementById('chNameInp').value.trim();if(!name){toast('Isi nama channel');return};await sb.from('channels').insert({owner_id:ME.id,name,description:document.getElementById('chDescInp').value.trim(),subscriber_count:0});closeModal('createChModal');document.getElementById('chNameInp').value='';document.getElementById('chDescInp').value='';loadChannels();toast('✅ Channel dibuat!')}
 
@@ -2111,8 +2295,7 @@ function subscribeCS(){if(!csTicketId)return;sb.channel('cs-u-'+csTicketId).on('
 window.saveDsKey=()=>{const k=document.getElementById('dsApiKey').value.trim();if(k){localStorage.setItem('nxl_ds_key',k);document.getElementById('botApiInfo').style.display='none'}}
 window.sendBotMsg=async()=>{
   const inp=document.getElementById('botInp'),text=inp.value.trim();if(!text)return
- const key = DEEPSEEK_KEY || localStorage.getItem('nxl_ds_key')
-if (!key) { document.getElementById('botApiInfo').style.display='block'; toast('Masukkan DeepSeek API Key dulu'); return }
+  const key=localStorage.getItem('nxl_ds_key');if(!key){document.getElementById('botApiInfo').style.display='block';toast('Masukkan DeepSeek API Key dulu');return}
   inp.value='';ar(inp)
   const wrap=document.getElementById('botMsgs');const ud=document.createElement('div');ud.className='bot-msg user';ud.textContent=text;wrap.appendChild(ud)
   const ld=document.createElement('div');ld.className='bot-msg ai loading';ld.innerHTML='<div class="t-dots"><span></span><span></span><span></span></div>';wrap.appendChild(ld);wrap.scrollTop=wrap.scrollHeight
