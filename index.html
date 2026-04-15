@@ -515,6 +515,22 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 #verifyPopup{display:none;}
 #verifyPopup.open{display:flex;}
 
+/* PASSKEY BOT */
+.pkbot-bubble{max-width:82%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.55;word-break:break-word;}
+.pkbot-bubble.bot{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;align-self:flex-start;color:var(--text);}
+.pkbot-bubble.user{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-bottom-right-radius:4px;align-self:flex-end;}
+.pkbot-bubble.otp{background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(16,185,129,.06));border:2px solid var(--success);font-size:22px;font-weight:800;letter-spacing:8px;text-align:center;color:var(--success);border-radius:12px;align-self:center;min-width:180px;}
+.pkbot-bubble.warn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:var(--danger);align-self:flex-start;}
+.pkbot-time{font-size:10px;color:var(--text-muted);margin-top:2px;}
+.pkbot-row{display:flex;flex-direction:column;gap:2px;}
+.pkbot-row.right{align-items:flex-end;}
+.pkbot-row.left{align-items:flex-start;}
+.pkbot-typing{display:flex;gap:4px;align-items:center;padding:10px 14px;background:var(--surface2);border-radius:14px;border-bottom-left-radius:4px;width:fit-content;border:1px solid var(--border);}
+.pkbot-typing span{width:7px;height:7px;background:var(--text-muted);border-radius:50%;animation:pk-bounce .9s infinite;}
+.pkbot-typing span:nth-child(2){animation-delay:.15s;}
+.pkbot-typing span:nth-child(3){animation-delay:.3s;}
+@keyframes pk-bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+
 @media(max-width:900px){.right-panel{width:100%;position:fixed;inset:0;z-index:60;}.left-sidebar{width:60px;}.main-panel{width:280px;}}
 @media(max-width:640px){.main-panel{display:none;}.main-panel.mob-show{display:flex;width:100%;position:fixed;inset:0;z-index:50;}.chat-area{display:none;}.chat-area.mob-show{display:flex;position:fixed;inset:0;z-index:40;}.left-sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;height:60px;flex-direction:row;justify-content:space-around;padding:0;border-right:none;border-top:1px solid var(--border);z-index:80;}.ls-btn-label{display:none;}.ls-logo,.ls-divider,.ls-spacer,.ls-avatar{display:none;}.mailbox-popup{left:8px;right:8px;width:auto;}.cs-panel{left:8px;right:8px;width:auto;}}
 </style>
@@ -548,14 +564,26 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
       <div id="regFields" style="display:none;flex-direction:column">
         <div class="form-group"><label class="form-lbl">Nama Lengkap</label><input class="a-inp" id="regName" placeholder="Nama lengkap kamu"></div>
         <div class="form-group"><label class="form-lbl">Username</label><input class="a-inp" id="regUser" placeholder="username (min 3 karakter)"></div>
+        <div class="form-group">
+          <label class="form-lbl">Passkey <span style="color:var(--accent)">(Kunci Keamanan Ekstra)</span></label>
+          <div style="position:relative">
+            <input class="a-inp" id="regPasskey" type="password" placeholder="Buat passkey rahasia (min 4 karakter)" style="padding-right:42px">
+            <button type="button" onclick="togglePassVis('regPasskey',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">👁</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:5px;line-height:1.5">🔐 Passkey digunakan untuk verifikasi login. Bot akan mengirim kode OTP setelah passkey benar.</div>
+        </div>
       </div>
       <!-- SHARED FIELDS -->
       <div class="form-group"><label class="form-lbl">Email</label><input class="a-inp" id="emailInp" type="email" placeholder="contoh@email.com"></div>
       <!-- Login only: verification code -->
       <div class="form-group" id="verifyCodeField" style="display:none">
-        <label class="form-lbl">Kode Verifikasi</label>
-        <input class="a-inp" id="verifyCode" type="text" placeholder="Kode 6 digit dari email" maxlength="6" style="letter-spacing:4px;text-align:center;font-size:18px;font-weight:700">
-        <div style="font-size:11px;color:var(--text-muted);margin-top:5px;text-align:center">Cek inbox atau folder spam emailmu</div>
+        <label class="form-lbl">Kode Verifikasi OTP</label>
+        <input class="a-inp" id="verifyCode" type="text" placeholder="Kode 6 digit dari Bot" maxlength="6" style="letter-spacing:4px;text-align:center;font-size:18px;font-weight:700">
+        <div style="margin-top:8px;text-align:center">
+          <span onclick="openPasskeyBot()" style="font-size:12px;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline;display:inline-flex;align-items:center;gap:4px">
+            🤖 Belum dapat kode? Minta via NexBot
+          </span>
+        </div>
       </div>
       <div class="form-group"><label class="form-lbl">Password</label>
         <div style="position:relative">
@@ -583,6 +611,36 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
     <div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px">Kode verifikasi telah dikirim ke<br><strong id="verifyEmailDisplay" style="color:var(--accent)"></strong><br><br>Masukkan kode tersebut di form login untuk mengaktifkan akun.</div>
     <div style="background:var(--surface2);border-radius:12px;padding:12px;font-size:12px;color:var(--text-muted);margin-bottom:16px">💡 Jika tidak ada di inbox, cek folder <strong>Spam / Promotions</strong></div>
     <button onclick="closeVerifyPopup()" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Mengerti, Lanjut Login</button>
+  </div>
+</div>
+
+<!-- PASSKEY BOT POPUP -->
+<div id="passkeyBotOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:1001;align-items:flex-end;justify-content:center;padding:0">
+  <div id="passkeyBotPanel" style="background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:480px;height:88vh;display:flex;flex-direction:column;border:1px solid var(--border);box-shadow:var(--shadow-lg);overflow:hidden;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)">
+    <!-- Header -->
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:linear-gradient(135deg,rgba(14,165,233,.06),rgba(16,185,129,.06))">
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🤖</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700">NexBot — Verifikasi Passkey</div>
+        <div style="font-size:11px;color:var(--success);display:flex;align-items:center;gap:3px">
+          <div style="width:6px;height:6px;background:var(--success);border-radius:50%"></div> Online
+        </div>
+      </div>
+      <button onclick="closePasskeyBot()" style="background:var(--surface2);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--text-muted);font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <!-- Chat messages -->
+    <div id="pkBotMsgs" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px"></div>
+    <!-- Input area -->
+    <div id="pkBotInputArea" style="padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0;background:var(--surface)">
+      <input id="pkBotInp" class="a-inp" placeholder="Ketik passkey kamu..." style="flex:1;margin:0" type="password" maxlength="50">
+      <button onclick="togglePassVis('pkBotInp',this)" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;color:var(--text-muted);font-size:14px">👁</button>
+      <button onclick="submitPasskey()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;padding:10px 16px;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px">Kirim</button>
+    </div>
+    <!-- Banned state -->
+    <div id="pkBotBanned" style="display:none;padding:14px;border-top:1px solid var(--border);background:rgba(239,68,68,.06);text-align:center;flex-shrink:0">
+      <div style="font-size:12px;color:var(--danger);font-weight:700">🚫 Akses diblokir sementara</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Terlalu banyak percobaan salah. Coba lagi dalam <span id="pkBanCountdown" style="font-weight:700;color:var(--danger)">60:00</span></div>
+    </div>
   </div>
 </div>
 
@@ -1171,49 +1229,78 @@ window.handleAuth=async()=>{
   btn.disabled=true;btn.textContent='⏳ Memproses...'
   try{
     if(isL){
-      // ── LOGIN dengan email + password ──
-      const verifyCodeVal=document.getElementById('verifyCode').value.trim()
+      // ── LOGIN: cek OTP passkey jika ada ──
+      const otpVal=document.getElementById('verifyCode').value.trim()
+      // Cek apakah OTP sudah diisi dan valid
+      if(document.getElementById('verifyCodeField').style.display!=='none'&&otpVal){
+        // Validasi OTP dulu via tabel login_otp
+        const{data:otpRow}=await sb.from('login_otp')
+          .select('*').eq('email',emailRaw).eq('otp',otpVal).eq('used',false)
+          .gt('expires_at',new Date().toISOString()).maybeSingle()
+        if(!otpRow){showAuthErr('Kode OTP tidak valid atau sudah expired');return}
+        // Mark OTP sebagai used
+        await sb.from('login_otp').update({used:true}).eq('id',otpRow.id)
+      }
       const{data,error}=await sb.auth.signInWithPassword({email:emailRaw,password:pass})
       if(error){
         if(error.message.toLowerCase().includes('email not confirmed')){
-          // Belum verify → tampilkan field kode OTP
           document.getElementById('verifyCodeField').style.display='block'
           document.getElementById('resendRow').style.display='block'
-          showAuthErr('Email belum diverifikasi. Masukkan kode dari email kamu.')
+          showAuthErr('Email belum diverifikasi. Minta kode via NexBot.')
         }else{
           showAuthErr('Email atau password salah')
         }
         return
       }
+      // Tampilkan field OTP jika belum
+      if(document.getElementById('verifyCodeField').style.display==='none'){
+        document.getElementById('verifyCodeField').style.display='block'
+        showAuthErr('Masukkan kode OTP dari NexBot untuk verifikasi login')
+        // Auto logout — jangan masuk dulu sebelum OTP
+        await sb.auth.signOut()
+        return
+      }
+      if(!otpVal){showAuthErr('Masukkan kode OTP dari NexBot');return}
       await loadProfile(data.user.id)
     }else{
-      // ── REGISTER dengan email ──
+      // ── REGISTER dengan email + passkey ──
       const name=document.getElementById('regName').value.trim()
       const uname=document.getElementById('regUser').value.trim().replace('@','').replace(/\s/g,'').toLowerCase()
+      const passkey=document.getElementById('regPasskey').value.trim()
       if(!name){showAuthErr('Masukkan nama lengkap');return}
       if(!uname||uname.length<3){showAuthErr('Username minimal 3 karakter');return}
       if(!/^[a-z0-9_]+$/.test(uname)){showAuthErr('Username hanya huruf kecil, angka, underscore');return}
-      // Cek username duplicate dulu
+      if(!passkey||passkey.length<4){showAuthErr('Passkey minimal 4 karakter');return}
+      // Cek username duplikat
       const{data:eu}=await sb.from('profiles').select('id').eq('username',uname).maybeSingle()
       if(eu){showAuthErr('Username sudah dipakai');return}
-      // Daftarkan ke supabase auth
+      // Hash passkey sederhana (bukan kriptografi penuh, tapi cukup untuk obfuskasi)
+      const passkeyHash=await hashStr(passkey)
       const{data,error}=await sb.auth.signUp({email:emailRaw,password:pass,options:{data:{display_name:name,username:uname}}})
       if(error){showAuthErr(error.message);return}
       if(data?.user){
-        // Buat profile — phone bisa null (hanya developer yang isi phone)
-        await sb.from('profiles').upsert({id:data.user.id,phone:null,username:uname,display_name:name,bio:'',role:'user',banned:false,flagged:false,badges:'[]'})
+        await sb.from('profiles').upsert({
+          id:data.user.id,phone:null,username:uname,display_name:name,
+          bio:'',role:'user',banned:false,flagged:false,badges:'[]',
+          passkey_hash:passkeyHash,
+          email:emailRaw
+        })
       }
-      // Tampilkan popup verifikasi email
       document.getElementById('verifyEmailDisplay').textContent=emailRaw
       document.getElementById('verifyPopup').style.display='flex'
       window._justRegistered=true
       window._registeredEmail=emailRaw
-      // Switch ke tab login
       switchTab('login')
       document.getElementById('emailInp').value=emailRaw
     }
   }catch(e){showAuthErr('Terjadi kesalahan: '+e.message)}
   finally{btn.disabled=false;btn.textContent=isL?'Masuk':'Daftar'}
+}
+
+// ── HASH UTILITY ───────────────────────────────────────────────
+async function hashStr(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str))
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')
 }
 
 window.closeVerifyPopup=()=>{document.getElementById('verifyPopup').style.display='none'}
@@ -1226,7 +1313,222 @@ window.resendVerification=async()=>{
   else{toast('📧 Kode baru dikirim ke '+email)}
 }
 
-;['emailInp','pass','regName','regUser'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')handleAuth()})})
+;['emailInp','pass','regName','regUser','regPasskey'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')handleAuth()})})
+
+// ══════════════════════════════════════════════════════════════
+// ── PASSKEY BOT SYSTEM ────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+
+let _pkBotEmail=''
+let _pkBotAttempts=0
+let _pkBotBanUntil=null
+let _pkBotOtpGenerated=null
+let _pkBanTimer=null
+const PK_MAX_ATTEMPTS=3
+const PK_BAN_MS=60*60*1000 // 1 jam
+
+window.openPasskeyBot=()=>{
+  _pkBotEmail=document.getElementById('emailInp').value.trim().toLowerCase()
+  if(!_pkBotEmail){toast('Isi email login dulu');return}
+  // Cek apakah sedang dibanned
+  const banKey='nxl_pk_ban_'+_pkBotEmail
+  const banUntil=localStorage.getItem(banKey)
+  if(banUntil&&Date.now()<parseInt(banUntil)){
+    _pkBotBanUntil=parseInt(banUntil)
+    showBotBanState()
+    openBotPanel()
+    return
+  }
+  _pkBotAttempts=parseInt(localStorage.getItem('nxl_pk_att_'+_pkBotEmail)||'0')
+  _pkBotOtpGenerated=null
+  openBotPanel()
+  pkBotReset()
+  setTimeout(()=>{pkBotMsg('bot','👋 Halo! Saya NexBot.\n\nUntuk keamanan akun, masukkan **Passkey** yang kamu buat saat daftar.\nJika passkey benar, saya akan kirim kode OTP sekali pakai ke layar ini.');},400)
+}
+
+function openBotPanel(){
+  const overlay=document.getElementById('passkeyBotOverlay')
+  const panel=document.getElementById('passkeyBotPanel')
+  overlay.style.display='flex'
+  setTimeout(()=>{panel.style.transform='translateY(0)'},10)
+  setTimeout(()=>document.getElementById('pkBotInp').focus(),400)
+}
+
+window.closePasskeyBot=()=>{
+  const panel=document.getElementById('passkeyBotPanel')
+  panel.style.transform='translateY(100%)'
+  setTimeout(()=>{
+    document.getElementById('passkeyBotOverlay').style.display='none'
+    if(_pkBanTimer){clearInterval(_pkBanTimer);_pkBanTimer=null}
+  },350)
+}
+
+function pkBotReset(){
+  document.getElementById('pkBotMsgs').innerHTML=''
+  document.getElementById('pkBotBanned').style.display='none'
+  document.getElementById('pkBotInputArea').style.display='flex'
+  document.getElementById('pkBotInp').value=''
+  document.getElementById('pkBotInp').type='password'
+}
+
+function pkBotMsg(who,text,cls=''){
+  const wrap=document.getElementById('pkBotMsgs')
+  const isBot=who==='bot'
+  const row=document.createElement('div')
+  row.className='pkbot-row '+(isBot?'left':'right')
+  const bub=document.createElement('div')
+  bub.className='pkbot-bubble '+(cls||who)
+  bub.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')
+  const time=document.createElement('div')
+  time.className='pkbot-time'
+  time.textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})
+  row.appendChild(bub)
+  row.appendChild(time)
+  wrap.appendChild(row)
+  wrap.scrollTop=wrap.scrollHeight
+  return bub
+}
+
+function pkBotTyping(){
+  const wrap=document.getElementById('pkBotMsgs')
+  const row=document.createElement('div')
+  row.className='pkbot-row left'
+  row.id='pkTyping'
+  row.innerHTML=`<div class="pkbot-typing"><span></span><span></span><span></span></div>`
+  wrap.appendChild(row)
+  wrap.scrollTop=wrap.scrollHeight
+}
+function pkRemoveTyping(){const el=document.getElementById('pkTyping');if(el)el.remove()}
+
+function showBotBanState(){
+  document.getElementById('pkBotInputArea').style.display='none'
+  document.getElementById('pkBotBanned').style.display='block'
+  pkBotMsg('bot','🚫 **Akses Diblokir Sementara**\n\nKamu telah salah memasukkan passkey 3 kali berturut-turut.\nUntuk keamanan akun, akses login diblokir selama **1 jam**.\n\nJika ini bukan kamu, segera hubungi support NexLink.','warn')
+  startBanCountdown()
+}
+
+function startBanCountdown(){
+  if(_pkBanTimer)clearInterval(_pkBanTimer)
+  _pkBanTimer=setInterval(()=>{
+    const rem=_pkBotBanUntil-Date.now()
+    if(rem<=0){
+      clearInterval(_pkBanTimer);_pkBanTimer=null
+      _pkBotAttempts=0
+      localStorage.removeItem('nxl_pk_ban_'+_pkBotEmail)
+      localStorage.setItem('nxl_pk_att_'+_pkBotEmail,'0')
+      document.getElementById('pkBotBanned').style.display='none'
+      document.getElementById('pkBotInputArea').style.display='flex'
+      pkBotReset()
+      pkBotMsg('bot','✅ Pemblokiran telah berakhir. Silakan coba kembali dengan passkey yang benar.')
+      return
+    }
+    const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000)
+    const el=document.getElementById('pkBanCountdown')
+    if(el)el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+  },1000)
+}
+
+window.submitPasskey=async()=>{
+  const inp=document.getElementById('pkBotInp')
+  const passkey=inp.value.trim()
+  if(!passkey){toast('Ketik passkey dulu');return}
+  // Cek ban
+  const banKey='nxl_pk_ban_'+_pkBotEmail
+  const banUntil=localStorage.getItem(banKey)
+  if(banUntil&&Date.now()<parseInt(banUntil)){
+    _pkBotBanUntil=parseInt(banUntil)
+    showBotBanState();return
+  }
+  // Tampilkan pesan user
+  pkBotMsg('user','••••••••')
+  inp.value=''
+  // Typing indicator
+  pkBotTyping()
+  await sleep(900)
+  pkRemoveTyping()
+  // Cari profil berdasarkan email di auth.users → profiles
+  const{data:{user}}=await sb.auth.getUser()
+  // Ambil passkey_hash dari profiles menggunakan email (via RPC atau langsung)
+  const{data:profile}=await sb.from('profiles')
+    .select('id,passkey_hash,display_name')
+    .eq('id', await getUidByEmail(_pkBotEmail))
+    .maybeSingle()
+  if(!profile?.passkey_hash){
+    pkBotMsg('bot','⚠️ Akun tidak ditemukan atau passkey belum diatur. Hubungi support.','warn');return
+  }
+  const inputHash=await hashStr(passkey)
+  if(inputHash!==profile.passkey_hash){
+    _pkBotAttempts++
+    localStorage.setItem('nxl_pk_att_'+_pkBotEmail,String(_pkBotAttempts))
+    const sisa=PK_MAX_ATTEMPTS-_pkBotAttempts
+    if(_pkBotAttempts>=PK_MAX_ATTEMPTS){
+      // BAN selama 1 jam
+      _pkBotBanUntil=Date.now()+PK_BAN_MS
+      localStorage.setItem(banKey,String(_pkBotBanUntil))
+      // Simpan event ke DB
+      await sb.from('login_attempts').insert({email:_pkBotEmail,banned_until:new Date(_pkBotBanUntil).toISOString()}).maybeSingle()
+      showBotBanState()
+    }else{
+      pkBotMsg('bot',`❌ **Passkey salah!**\n\nSisa percobaan: **${sisa}x** lagi.\nHati-hati — setelah ${sisa} kali salah lagi, akses login akan diblokir 1 jam.`,'warn')
+    }
+    return
+  }
+  // ── PASSKEY BENAR ──
+  _pkBotAttempts=0
+  localStorage.setItem('nxl_pk_att_'+_pkBotEmail,'0')
+  pkBotMsg('bot',`✅ **Passkey benar!**\n\nHalo, ${esc(profile.display_name||'Pengguna')}! 👋\nSedang membuat kode OTP untukmu...`)
+  pkBotTyping()
+  await sleep(1200)
+  pkRemoveTyping()
+  // Generate OTP 6 digit
+  const otp=String(Math.floor(100000+Math.random()*900000))
+  _pkBotOtpGenerated=otp
+  const expiresAt=new Date(Date.now()+5*60*1000).toISOString() // 5 menit
+  // Hapus OTP lama untuk email ini
+  await sb.from('login_otp').delete().eq('email',_pkBotEmail)
+  // Simpan OTP baru
+  await sb.from('login_otp').insert({
+    email:_pkBotEmail,
+    otp,
+    used:false,
+    expires_at:expiresAt
+  })
+  // Tampilkan OTP di chat
+  pkBotMsg('bot','🔐 **Kode OTP Login kamu:**')
+  pkBotMsg('otp',otp,'otp')
+  pkBotMsg('bot','⏱ Kode ini berlaku **5 menit** dan hanya dapat digunakan **satu kali**.\n\nSalin kode di atas dan masukkan ke kolom verifikasi di halaman login.\n\n⚠️ Jangan bagikan kode ini ke siapapun!')
+  // Isi otomatis ke field OTP di form login
+  const otpField=document.getElementById('verifyCode')
+  if(otpField)otpField.value=otp
+  document.getElementById('verifyCodeField').style.display='block'
+  // Disable input bot setelah OTP dikirim
+  document.getElementById('pkBotInputArea').style.display='none'
+  // Tambah tombol tutup
+  const wrap=document.getElementById('pkBotMsgs')
+  const closeRow=document.createElement('div')
+  closeRow.style.cssText='display:flex;justify-content:center;margin-top:8px'
+  closeRow.innerHTML=`<button onclick="closePasskeyBot()" style="padding:10px 24px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px">✅ Tutup & Login</button>`
+  wrap.appendChild(closeRow)
+  wrap.scrollTop=wrap.scrollHeight
+}
+
+async function getUidByEmail(email){
+  // Query profile via join: cari auth.users by email, ambil id-nya
+  // Karena tidak bisa query auth.users langsung dari client, pakai tabel profiles
+  // yang sudah ada email info lewat auth, kita perlu rpc atau cara lain.
+  // Solusi: simpan email di profiles saat register
+  const{data}=await sb.from('profiles').select('id').eq('email',email).maybeSingle()
+  if(data?.id)return data.id
+  // Fallback: coba login sementara untuk dapat uid
+  return null
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+// Pasang event Enter di bot input
+document.getElementById('pkBotInp').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();submitPasskey()}
+})
 
 async function init(){initTheme();const{data:{session}}=await sb.auth.getSession();if(session)await loadProfile(session.user.id)}
 
