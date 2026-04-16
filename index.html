@@ -511,10 +511,6 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 .gd-tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent;transition:.15s;}
 .gd-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
-/* VERIFY POPUP */
-#verifyPopup{display:none;}
-#verifyPopup.open{display:flex;}
-
 /* PASSKEY BOT */
 .pkbot-bubble{max-width:82%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.55;word-break:break-word;}
 .pkbot-bubble.bot{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;align-self:flex-start;color:var(--text);}
@@ -593,24 +589,8 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
       </div>
       <div id="authErrBox" style="display:none" class="auth-err">⚠️ <span id="authErrMsg"></span></div>
       <button class="auth-btn" id="authBtn" onclick="handleAuth()">Masuk</button>
-      <div id="resendRow" style="display:none;text-align:center;margin-top:8px">
-        <span style="font-size:12px;color:var(--text-muted)">Tidak dapat kode? </span>
-        <button onclick="resendVerification()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Kirim Ulang</button>
-      </div>
       <div class="auth-terms">Dengan melanjutkan kamu menyetujui <a href="#">Syarat & Ketentuan</a> kami</div>
     </div>
-  </div>
-</div>
-
-<!-- VERIFY EMAIL POPUP -->
-<div id="verifyPopup" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:1000;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--surface);border-radius:20px;padding:28px 24px;max-width:360px;width:100%;text-align:center;border:1px solid var(--border);box-shadow:var(--shadow-lg);position:relative">
-    <button onclick="closeVerifyPopup()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);line-height:1">✕</button>
-    <div style="font-size:48px;margin-bottom:12px">📧</div>
-    <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">Cek Emailmu!</div>
-    <div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px">Kode verifikasi telah dikirim ke<br><strong id="verifyEmailDisplay" style="color:var(--accent)"></strong><br><br>Masukkan kode tersebut di form login untuk mengaktifkan akun.</div>
-    <div style="background:var(--surface2);border-radius:12px;padding:12px;font-size:12px;color:var(--text-muted);margin-bottom:16px">💡 Jika tidak ada di inbox, cek folder <strong>Spam / Promotions</strong></div>
-    <button onclick="closeVerifyPopup()" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Mengerti, Lanjut Login</button>
   </div>
 </div>
 
@@ -1203,14 +1183,7 @@ window.switchTab=mode=>{
   document.getElementById('regFields').style.display=iL?'none':'flex'
   document.getElementById('authBtn').textContent=iL?'Masuk':'Daftar'
   document.getElementById('verifyCodeField').style.display='none'
-  document.getElementById('resendRow').style.display='none'
   hideAuthErr()
-  // Kalau baru pindah ke login setelah register, tampilkan kolom kode verifikasi
-  if(iL&&window._justRegistered){
-    document.getElementById('verifyCodeField').style.display='block'
-    document.getElementById('resendRow').style.display='block'
-    window._justRegistered=false
-  }
 }
 function showAuthErr(m){const b=document.getElementById('authErrBox'),e=document.getElementById('authErrMsg');if(b&&e){b.style.display='flex';e.textContent=m}}
 function hideAuthErr(){const b=document.getElementById('authErrBox');if(b)b.style.display='none'}
@@ -1229,38 +1202,30 @@ window.handleAuth=async()=>{
   btn.disabled=true;btn.textContent='⏳ Memproses...'
   try{
     if(isL){
-      // ── LOGIN: cek OTP passkey jika ada ──
+      // ── LOGIN: cek OTP passkey ──
       const otpVal=document.getElementById('verifyCode').value.trim()
-      // Cek apakah OTP sudah diisi dan valid
-      if(document.getElementById('verifyCodeField').style.display!=='none'&&otpVal){
-        // Validasi OTP dulu via tabel login_otp
-        const{data:otpRow}=await sb.from('login_otp')
-          .select('*').eq('email',emailRaw).eq('otp',otpVal).eq('used',false)
-          .gt('expires_at',new Date().toISOString()).maybeSingle()
-        if(!otpRow){showAuthErr('Kode OTP tidak valid atau sudah expired');return}
-        // Mark OTP sebagai used
-        await sb.from('login_otp').update({used:true}).eq('id',otpRow.id)
-      }
-      const{data,error}=await sb.auth.signInWithPassword({email:emailRaw,password:pass})
-      if(error){
-        if(error.message.toLowerCase().includes('email not confirmed')){
-          document.getElementById('verifyCodeField').style.display='block'
-          document.getElementById('resendRow').style.display='block'
-          showAuthErr('Email belum diverifikasi. Minta kode via NexBot.')
-        }else{
-          showAuthErr('Email atau password salah')
-        }
-        return
-      }
-      // Tampilkan field OTP jika belum
+      // Jika field OTP belum tampil, tampilkan dulu — minta user minta kode via NexBot
       if(document.getElementById('verifyCodeField').style.display==='none'){
+        // Coba login dulu untuk cek email+password valid
+        const{error:checkErr}=await sb.auth.signInWithPassword({email:emailRaw,password:pass})
+        if(checkErr){showAuthErr('Email atau password salah');return}
+        // Password valid — logout sementara, minta OTP
+        await sb.auth.signOut()
         document.getElementById('verifyCodeField').style.display='block'
         showAuthErr('Masukkan kode OTP dari NexBot untuk verifikasi login')
-        // Auto logout — jangan masuk dulu sebelum OTP
-        await sb.auth.signOut()
         return
       }
       if(!otpVal){showAuthErr('Masukkan kode OTP dari NexBot');return}
+      // Validasi OTP via tabel login_otp
+      const{data:otpRow}=await sb.from('login_otp')
+        .select('*').eq('email',emailRaw).eq('otp',otpVal).eq('used',false)
+        .gt('expires_at',new Date().toISOString()).maybeSingle()
+      if(!otpRow){showAuthErr('Kode OTP tidak valid atau sudah expired');return}
+      // OTP valid — login
+      const{data,error}=await sb.auth.signInWithPassword({email:emailRaw,password:pass})
+      if(error){showAuthErr('Email atau password salah');return}
+      // Mark OTP sebagai used
+      await sb.from('login_otp').update({used:true}).eq('id',otpRow.id)
       await loadProfile(data.user.id)
     }else{
       // ── REGISTER dengan email + passkey ──
@@ -1286,31 +1251,21 @@ window.handleAuth=async()=>{
           email:emailRaw
         })
       }
-      document.getElementById('verifyEmailDisplay').textContent=emailRaw
-      document.getElementById('verifyPopup').style.display='flex'
-      window._justRegistered=true
-      window._registeredEmail=emailRaw
+      // Langsung pindah ke tab login, tampilkan pesan sukses
       switchTab('login')
       document.getElementById('emailInp').value=emailRaw
+      document.getElementById('verifyCodeField').style.display='block'
+      showAuthErr('✅ Akun berhasil dibuat! Login dengan email & password, lalu minta kode OTP via 🤖 NexBot.')
+      document.getElementById('authErrBox').style.color='var(--success)'
     }
   }catch(e){showAuthErr('Terjadi kesalahan: '+e.message)}
-  finally{btn.disabled=false;btn.textContent=isL?'Masuk':'Daftar'}
+  finally{btn.disabled=false;btn.textContent=isL?'Masuk':'Daftar';document.getElementById('authErrBox').style.color=''}
 }
 
 // ── HASH UTILITY ───────────────────────────────────────────────
 async function hashStr(str){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str))
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')
-}
-
-window.closeVerifyPopup=()=>{document.getElementById('verifyPopup').style.display='none'}
-
-window.resendVerification=async()=>{
-  const email=document.getElementById('emailInp').value.trim().toLowerCase()
-  if(!email){toast('Isi email dulu');return}
-  const{error}=await sb.auth.resend({type:'signup',email})
-  if(error){toast('❌ Gagal kirim ulang: '+error.message)}
-  else{toast('📧 Kode baru dikirim ke '+email)}
 }
 
 ;['emailInp','pass','regName','regUser','regPasskey'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')handleAuth()})})
