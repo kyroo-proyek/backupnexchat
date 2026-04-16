@@ -1127,7 +1127,7 @@ const scrollB = ()=>{const w=document.getElementById('msgsWrap');if(w)w.scrollTo
 const scrollGc = ()=>{const w=document.getElementById('gcMsgs');if(w)w.scrollTop=w.scrollHeight}
 const ar = el=>{el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px'}
 const getContact = (uid,fb)=>savedContacts[uid]||fb
-function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
+function toast(msg,d=2500){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
 
 // ── BADGE ICON SVG (no emoji) ──────────────────────────────────
 function badgeIconSvg(icon,color){
@@ -1530,13 +1530,30 @@ document.getElementById('pkBotInp').addEventListener('keydown',e=>{
   if(e.key==='Enter'){e.preventDefault();submitPasskey()}
 })
 
-async function init(){initTheme();const{data:{session}}=await sb.auth.getSession();if(session)await loadProfile(session.user.id)}
+async function init(){
+  initTheme()
+  try{
+    const{data,error}=await sb.auth.getSession()
+    if(error)throw error
+    if(data?.session)await loadProfile(data.session.user.id)
+  }catch(e){
+    console.error('Init error:',e)
+    // Tampilkan auth screen jika session error
+    document.getElementById('authScreen').style.display='flex'
+  }
+}
 
 async function loadProfile(uid,retry=0){
   if(retry>6){await sb.auth.signOut();location.reload();return}
   const{data:p}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle()
   if(!p){setTimeout(()=>loadProfile(uid,retry+1),600);return}
-  if(p.banned){document.getElementById('authScreen').style.display='none';document.getElementById('bannedScreen').classList.add('show');document.getElementById('bannedReason').textContent='Alasan: '+(p.banned_reason||'Pelanggaran S&K');ME=p;return}
+  if(p.banned){
+    document.getElementById('authScreen').style.display='none'
+    document.getElementById('bannedScreen').classList.add('show')
+    document.getElementById('bannedReason').textContent='Alasan: '+(p.banned_reason||'Pelanggaran S&K')
+    ME=p
+    return
+  }
   ME=p;document.getElementById('authScreen').style.display='none';document.getElementById('app').style.display='flex';startApp()
 }
 
@@ -1694,7 +1711,7 @@ window.sendMsg=async()=>{
   const tempMsg={id:tempId,chat_id:activeChat.chat_id,sender_id:ME.id,content:text||null,file_url:null,file_type:null,file_name:null,file_size:null,deleted:false,edited:false,read_by:[],reply_to:replyTo?.id||null,created_at:new Date().toISOString()}
   renderMsg(tempMsg);scrollB();inp.value='';inp.style.height='auto';clearReply();closeAttach()
   let file_url=null,file_type=null,file_name=null,file_size=null
-  if(pendingFile){const r=await uploadFile(pendingFile.file,pendingFile.type);file_url=r?.url;file_type=pendingFile.type;file_name=pendingFile.file.name;file_size=pendingFile.file.size;clearPendingFile();const p=document.getElementById('pendingPreview');if(p)p.style.display='none'}
+  if(pendingFile){const r=await uploadFile(pendingFile.file,pendingFile.type);if(!r){toast('❌ Upload file gagal');const tempEl2=document.getElementById('msg-'+tempId);if(tempEl2)tempEl2.remove();return}file_url=r?.url;file_type=pendingFile.type;file_name=pendingFile.file.name;file_size=pendingFile.file.size;clearPendingFile();const p=document.getElementById('pendingPreview');if(p)p.style.display='none'}
   const{data:saved}=await sb.from('messages').insert({chat_id:activeChat.chat_id,sender_id:ME.id,content:text||null,file_url,file_type,file_name,file_size,deleted:false,edited:false,reply_to:replyTo?.id||null}).select().single()
   const tempEl=document.getElementById('msg-'+tempId)
   if(tempEl){if(saved){tempEl.id='msg-'+saved.id;tempEl.innerHTML=buildMsg(saved)}else tempEl.remove()}
@@ -1703,7 +1720,7 @@ window.sendMsg=async()=>{
 }
 
 // ── TYPING ─────────────────────────────────────────────────────
-function broadcastTyping(){if(!typingCh&&activeChat)return;if(typingCh)typingCh.send({type:'broadcast',event:'typing',payload:{from:ME.id}})}
+function broadcastTyping(){if(!typingCh||!activeChat)return;typingCh.send({type:'broadcast',event:'typing',payload:{from:ME.id}})}
 const msgInp=document.getElementById('msgInp')
 msgInp.addEventListener('input',e=>{ar(e.target);broadcastTyping();closeAttach()})
 msgInp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}})
@@ -1720,6 +1737,8 @@ window.clearReply=()=>{replyTo=null;document.getElementById('replyBar').classLis
 let pendingFile=null
 window.handleFile=(inp,type)=>{
   const f=inp.files[0];if(!f)return
+  const MAX_SIZE=50*1024*1024
+  if(f.size>MAX_SIZE){toast('❌ File terlalu besar (maks 50MB)');inp.value='';return}
   pendingFile={file:f,type}
   // Show preview
   const prev=document.getElementById('pendingPreview')
@@ -1737,7 +1756,7 @@ window.handleFile=(inp,type)=>{
   }
   closeAttach();inp.value=''
 }
-window.clearPendingFileUI=()=>{clearPendingFile();const p=document.getElementById('pendingPreview');if(p)p.style.display='none'}
+window.clearPendingFileUI=()=>{clearPendingFile();const p=document.getElementById('pendingPreview');if(p)p.style.display='none';const t=document.getElementById('pendingThumb');if(t)t.innerHTML=''}
 function clearPendingFile(){pendingFile=null}
 async function uploadFile(file,type){
   const path=`${ME.id}/${Date.now()}-${file.name.replace(/\s/g,'_')}`
@@ -1808,7 +1827,7 @@ window.searchUsers=async()=>{
   if(!q){res.innerHTML='<div class="find-empty-txt">Ketik untuk mencari</div>';return}
   res.innerHTML='<div class="find-empty-txt">⏳ Mencari...</div>'
   try{
-    const{data}=await sb.from('profiles').select('id,display_name,username,avatar_url,phone,verified_green,verified_blue,verified_gold,flagged,flag_reason,badges').or(`username.ilike.%${q}%,display_name.ilike.%${q}%`).neq('id',ME.id).limit(15)
+    const{data}=await sb.from('profiles').select('id,display_name,username,avatar_url,phone,verified_green,verified_blue,verified_gold,flagged,flag_reason,badges').or(`username.ilike.%${q}%,display_name.ilike.%${q}%`).neq('id',ME.id).eq('banned',false).limit(15)
     if(!data?.length){res.innerHTML='<div class="find-empty-txt">Tidak ditemukan</div>';return}
     res.innerHTML=''
     data.forEach(u=>{
@@ -1848,8 +1867,8 @@ async function startChatWith(user){
   if(user.flagged){if(!confirm(`⚠️ PERINGATAN!\nAkun ini ditandai: ${user.flag_reason||'Berbahaya'}\n\nLanjutkan?`))return}
   closeModal('findModal')
   let{data:ex}=await sb.from('chats').select('*').or(`and(user_a.eq.${ME.id},user_b.eq.${user.id}),and(user_a.eq.${user.id},user_b.eq.${ME.id})`).maybeSingle()
-  if(!ex){const{data:nc}=await sb.from('chats').insert({user_a:ME.id,user_b:user.id}).select().single();ex=nc}
-  await loadChats();const full=chats.find(c=>c.id===ex?.id);openChat(ex.id,full?getOther(full):user);switchNav('chats')
+  if(!ex){const{data:nc,error:ncErr}=await sb.from('chats').insert({user_a:ME.id,user_b:user.id}).select().single();if(ncErr||!nc){toast('❌ Gagal membuka chat');return};ex=nc}
+  await loadChats();const full=chats.find(c=>c.id===ex?.id);if(!ex?.id){toast('❌ Chat tidak ditemukan');return};openChat(ex.id,full?getOther(full):user);switchNav('chats')
 }
 
 // ── RIGHT PANEL ────────────────────────────────────────────────
@@ -1950,7 +1969,7 @@ window.toggleLike=async(uid,isLiked)=>{if(isLiked){await sb.from('profile_likes'
 window.deleteChat=async(chatId)=>{if(!confirm('Hapus chat ini?'))return;const c=chats.find(c=>c.id===chatId);const newDel=[...(c?.deleted_by||[]),ME.id];await sb.from('chats').update({deleted_by:newDel}).eq('id',chatId);chats=chats.filter(c=>c.id!==chatId);renderChatList();closeRightPanel();closeChat();toast('🗑️ Chat dihapus')}
 
 // ── REPORT ─────────────────────────────────────────────────────
-window.openReport=(uid)=>{reportTarget=uid||activeChat?.other?.id;reportReason=null;document.querySelectorAll('.r-opt').forEach(o=>o.classList.remove('sel'));document.getElementById('reportModal').classList.add('open')}
+window.openReport=(uid)=>{const target=uid||activeChat?.other?.id;if(target===ME.id){toast('Tidak bisa melaporkan diri sendiri');return};reportTarget=target;reportReason=null;document.querySelectorAll('.r-opt').forEach(o=>o.classList.remove('sel'));document.getElementById('reportModal').classList.add('open')}
 window.selReport=(el,r)=>{reportReason=r;document.querySelectorAll('.r-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel')}
 window.submitReport=async()=>{if(!reportReason){toast('Pilih alasan laporan');return}await sb.from('reports').insert({reporter_id:ME.id,reported_id:reportTarget,reason:reportReason});closeModal('reportModal');toast('✅ Laporan terkirim!')}
 
@@ -1990,7 +2009,7 @@ function renderGroupList(q=''){
           <span style="font-size:10px;color:var(--text-muted)">${g.member_count||0} member</span>
           ${g.myRole==='owner'?`<span class="role-badge-owner">👑 Owner</span>`:g.myRole==='admin'?`<span class="role-badge-admin">⚙️ Admin</span>`:''}
         </div>
-        <div class="ci-preview">${esc(g.description||'Grup community')}</div>
+        <div class="ci-preview">${esc(g.last_message||g.description||'Grup community')}</div>
       </div>
       <div class="ci-meta">
         ${unread>0?`<div class="unread-badge">${unread}</div>`:''}
@@ -2006,7 +2025,7 @@ window.openCreateGroup=()=>openModal('createGroupModal')
 window.createGroup=async()=>{
   const name=document.getElementById('grpNameInp').value.trim()
   const desc=document.getElementById('grpDescInp').value.trim()
-  if(!name){toast('Isi nama grup');return}
+  if(!name||name.length<3){toast('Nama grup minimal 3 karakter');return}
   const{data:g}=await sb.from('community_groups').insert({name,description:desc,owner_id:ME.id,member_count:1,is_verified:false,is_locked:false,is_danger:false}).select().single()
   if(!g){toast('Gagal membuat grup');return}
   await sb.from('group_members').insert({group_id:g.id,user_id:ME.id,role:'owner'})
@@ -2148,6 +2167,7 @@ window.sendGroupMsg=async()=>{
   let file_url=null,file_type=null,file_name=null,file_size=null
   if(gcPendingFile){
     const r=await uploadFile(gcPendingFile.file,gcPendingFile.type)
+    if(!r){toast('❌ Upload file gagal');return}
     file_url=r?.url;file_type=gcPendingFile.type;file_name=gcPendingFile.file.name;file_size=gcPendingFile.file.size
     clearGcPendingFile()
   }
@@ -2172,6 +2192,8 @@ gcInp.addEventListener('input',e=>{ar(e.target);if(gcMsgCh&&activeGroup)gcMsgCh.
 let gcPendingFile=null
 window.handleGcFile=(inp,type)=>{
   const f=inp.files[0];if(!f)return
+  const MAX_SIZE=50*1024*1024
+  if(f.size>MAX_SIZE){toast('❌ File terlalu besar (maks 50MB)');inp.value='';return}
   gcPendingFile={file:f,type}
   const prev=document.getElementById('gcPendingPreview')
   const thumb=document.getElementById('gcPendingThumb')
@@ -2186,11 +2208,11 @@ window.handleGcFile=(inp,type)=>{
   }
   closeGcAttach();inp.value=''
 }
-window.clearGcPendingFile=()=>{gcPendingFile=null;const p=document.getElementById('gcPendingPreview');if(p)p.style.display='none'}
+window.clearGcPendingFile=()=>{gcPendingFile=null;const p=document.getElementById('gcPendingPreview');if(p)p.style.display='none';const t=document.getElementById('gcPendingThumb');if(t)t.innerHTML=''}
 window.toggleGcAttach=()=>document.getElementById('gcAttachMenu').classList.toggle('open')
 function closeGcAttach(){const m=document.getElementById('gcAttachMenu');if(m)m.classList.remove('open')}
 document.addEventListener('click',e=>{if(!e.target.closest('#gcInputArea .att-btn')&&!e.target.closest('#gcAttachMenu'))closeGcAttach()})
-window.delGroupMsg=async id=>{if(!confirm('Hapus pesan ini?'))return;await sb.from('group_messages').update({deleted:true,content:null}).eq('id',id)}
+window.delGroupMsg=async id=>{if(!confirm('Hapus pesan ini?'))return;await sb.from('group_messages').update({deleted:true,content:null,file_url:null,file_type:null}).eq('id',id)}
 window.setGcReply=(id,text,author)=>{gcReplyTo={id,text,author};document.getElementById('gcRbAuthor').textContent=author||'Pesan';document.getElementById('gcRbText').textContent=text;document.getElementById('gcReplyBar').classList.add('show');document.getElementById('gcInp').focus()}
 window.clearGcReply=()=>{gcReplyTo=null;document.getElementById('gcReplyBar').classList.remove('show')}
 window.closeGroupChat=()=>{activeGroup=null;document.getElementById('groupChatView').style.display='none';document.getElementById('chatEmpty').style.display='flex';document.getElementById('rightPanel').classList.remove('open');if(gcMsgCh)sb.removeChannel(gcMsgCh)}
@@ -2208,9 +2230,8 @@ window.openGroupDetail=async()=>{
   const content=document.getElementById('rpContent')
   content.innerHTML=`
     <div class="group-detail-hdr">
-      <div class="gd-banner">${g.banner_url?`<img src="${g.banner_url}">`:''}
+      <div class="gd-banner">${g.banner_url?`<img src="${g.banner_url}">`:''}</div>
         <div class="gd-av-wrap"><div class="gd-av">${g.banner_url?'':(g.name||'G')[0].toUpperCase()}</div></div>
-      </div>
       <div class="gd-body">
         <div class="gd-name">${esc(g.name)} ${g.is_verified?'<span class="g-tag verified">✓ Verified</span>':''} ${g.is_danger?'<span class="g-tag danger">🚨 Berbahaya</span>':''}${g.is_locked?'<span class="g-tag locked">🔒 Dikunci</span>':''}</div>
         <div class="gd-desc">${esc(g.description||'Tidak ada deskripsi')}</div>
@@ -2424,7 +2445,7 @@ window.doChangeEmail=async()=>{
   else{toast('📧 Konfirmasi dikirim ke '+em+'. Cek email!');closeRightPanel()}
 }
 window.uploadAvatar=async inp=>{const f=inp.files[0];if(!f)return;const path=`avatars/${ME.id}/${Date.now()}.${f.name.split('.').pop()}`;const{error}=await sb.storage.from('nxl-avatars').upload(path,f,{upsert:true});if(error){toast('Upload gagal');return};const url=sb.storage.from('nxl-avatars').getPublicUrl(path).data.publicUrl;await sb.from('profiles').update({avatar_url:url}).eq('id',ME.id);ME.avatar_url=url;updateLsAvatar();renderMyProfile();toast('✅ Foto diperbarui')}
-window.logout=async()=>{await sb.auth.signOut();location.reload()}
+window.logout=async()=>{if(!confirm('Keluar dari NexLink?'))return;await sb.auth.signOut();location.reload()}
 
 // ── STORIES ────────────────────────────────────────────────────
 async function loadStories(){
@@ -2452,10 +2473,10 @@ function renderStoryList(){
 
 window.openPostStory=()=>{const myStory=stories.find(s=>s.user_id===ME.id);if(myStory){if(!confirm('Hapus story lama dan buat baru?'))return;deleteMyStory(myStory.id)};openModal('storyModal')}
 async function deleteMyStory(id){await sb.from('stories').delete().eq('id',id);stories=stories.filter(s=>s.id!==id);renderStoryList()}
-window.postStory=async()=>{const content=document.getElementById('storyContent').value.trim();if(!content){toast('Tulis isi story');return};await sb.from('stories').insert({user_id:ME.id,content});closeModal('storyModal');document.getElementById('storyContent').value='';await loadStories();toast('✅ Story diupload!')}
+window.postStory=async()=>{const content=document.getElementById('storyContent').value.trim();if(!content||content.length<2){toast('Tulis isi story');return};const expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();await sb.from('stories').insert({user_id:ME.id,content,expires_at:expiresAt});closeModal('storyModal');document.getElementById('storyContent').value='';await loadStories();toast('✅ Story diupload!')}
 window.viewStory=async(story)=>{activeStory=story;const viewer=document.getElementById('storyViewer'),name=story.user?.display_name||story.user?.username||'User';document.getElementById('svTop').innerHTML=`<div class="sv-av">${story.user?.avatar_url?`<img src="${story.user.avatar_url}">`:name[0].toUpperCase()}</div><div class="sv-name">${esc(name)}</div><div class="sv-time">${fmt(story.created_at)}</div>`;document.getElementById('svBody').innerHTML=`<div class="sv-content">${esc(story.content)}</div>`;document.getElementById('svReply').style.display=story.user_id===ME.id?'none':'flex';viewer.classList.add('open')}
 window.closeStoryViewer=()=>{document.getElementById('storyViewer').classList.remove('open');activeStory=null}
-window.sendStoryReply=async()=>{if(!activeStory)return;const inp=document.getElementById('svReplyInp'),t=inp.value.trim();if(!t)return;await sb.from('story_replies').insert({story_id:activeStory.id,user_id:ME.id,content:t});inp.value='';toast('✅ Balasan terkirim');closeStoryViewer()}
+window.sendStoryReply=async()=>{if(!activeStory)return;const inp=document.getElementById('svReplyInp'),t=inp.value.trim();if(!t)return;await sb.from('story_replies').insert({story_id:activeStory.id,user_id:ME.id,content:t});if(activeStory.user_id!==ME.id){await sb.from('notifications').insert({user_id:activeStory.user_id,type:'story_reply',title:ME.display_name||ME.username,body:'membalas story kamu: '+t.substring(0,50),data:{user_id:ME.id,story_id:activeStory.id}})}inp.value='';toast('✅ Balasan terkirim');closeStoryViewer()}
 
 // ── CHANNELS ───────────────────────────────────────────────────
 async function loadChannels(){const{data}=await sb.from('channels').select('*,channel_subscribers(user_id)').order('subscriber_count',{ascending:false});channels=data||[];renderChannelList()}
@@ -2510,7 +2531,7 @@ window.sendChannelMsg=async()=>{
   if(error){toast('❌ Gagal kirim pesan: '+error.message);inp.value=t}
 }
 document.getElementById('cvInp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChannelMsg()}})
-window.createChannel=async()=>{const name=document.getElementById('chNameInp').value.trim();if(!name){toast('Isi nama channel');return};await sb.from('channels').insert({owner_id:ME.id,name,description:document.getElementById('chDescInp').value.trim(),subscriber_count:0});closeModal('createChModal');document.getElementById('chNameInp').value='';document.getElementById('chDescInp').value='';loadChannels();toast('✅ Channel dibuat!')}
+window.createChannel=async()=>{const name=document.getElementById('chNameInp').value.trim();if(!name||name.length<3){toast('Isi nama channel');return};await sb.from('channels').insert({owner_id:ME.id,name,description:document.getElementById('chDescInp').value.trim(),subscriber_count:0});closeModal('createChModal');document.getElementById('chNameInp').value='';document.getElementById('chDescInp').value='';loadChannels();toast('✅ Channel dibuat!')}
 
 // ── NOTIFICATIONS ──────────────────────────────────────────────
 async function loadNotifs(){const{data}=await sb.from('notifications').select('*').eq('user_id',ME.id).order('created_at',{ascending:false}).limit(50);notifs=data||[];renderNotifList();const unread=(data||[]).filter(n=>!n.read).length;document.getElementById('notifDot').classList.toggle('show',unread>0)}
@@ -2620,7 +2641,9 @@ window.closeAppeal=()=>document.getElementById('appealOverlay').classList.remove
 window.submitAppeal=async()=>{const msg=document.getElementById('appealText').value.trim();if(!msg){toast('Tulis pesan banding');return};await sb.from('appeals').insert({user_id:ME?.id||null,phone:ME?.phone||null,message:msg});document.getElementById('appealDone').style.display='block';setTimeout(()=>closeAppeal(),3000)}
 
 // ── SUBSCRIBE GLOBAL ───────────────────────────────────────────
+let _globalSubActive=false
 function subscribeGlobal(){
+  if(_globalSubActive)return;_globalSubActive=true
   sb.channel('chats-g').on('postgres_changes',{event:'INSERT',schema:'public',table:'chats'},()=>loadChats()).on('postgres_changes',{event:'UPDATE',schema:'public',table:'chats'},()=>loadChats()).subscribe()
   sb.channel('msgs-g').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},async p=>{
     const m=p.new;if(m.sender_id===ME.id)return
@@ -2652,7 +2675,7 @@ function subscribeGlobal(){
 
 function subscribeProfiles(){
   sb.channel('prof-g').on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},p=>{
-    if(p.new.id===ME.id&&p.new.banned){document.getElementById('app').style.display='none';document.getElementById('bannedScreen').classList.add('show');document.getElementById('bannedReason').textContent='Alasan: '+(p.new.banned_reason||'Pelanggaran S&K');return}
+    if(p.new.id===ME.id&&p.new.banned){document.getElementById('app').style.display='none';document.getElementById('bannedScreen').classList.add('show');document.getElementById('bannedReason').textContent='Alasan: '+(p.new.banned_reason||'Pelanggaran S&K');if(ME)ME.banned=true;return}
     if(chats.some(c=>c.user_a===p.new.id||c.user_b===p.new.id))loadChats()
   }).subscribe()
 }
